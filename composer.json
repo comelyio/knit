@@ -1,0 +1,22 @@
+{
+  "name": "comelyio/knit",
+  "description": "Template Engine",
+  "minimum-stability": "alpha",
+  "keywords": ["comely", "knit", "template engine"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Furqan A. Siddiqui",
+      "email": "mfsid@comely.io"
+    }
+  ],
+  "require": {
+    "comelyio/comely": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Comely\\Knit\\": "src/Knit/"
+    },
+    "files": ["src/Knit.php", "src/KnitException.php"]
+  }
+}
