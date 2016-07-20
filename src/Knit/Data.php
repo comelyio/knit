@@ -83,6 +83,15 @@ class Data
     }
 
     /**
+     * @param string $key
+     * @return bool
+     */
+    public function __get(string $key)
+    {
+        return $this->get($key);
+    }
+
+    /**
      * Purge all stored key/value pairs
      */
     public function flush()

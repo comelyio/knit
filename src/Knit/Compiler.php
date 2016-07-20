@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace Comely\Knit;
 
+use Comely\IO\DependencyInjection\Repository;
 use Comely\IO\Filesystem\Exception\DiskException;
 use Comely\Knit;
 use Comely\Knit\Traits\ConfigTrait;
 use Comely\Knit\Traits\DataTrait;
+
 use Comely\KnitException;
 
 /**
@@ -16,6 +18,7 @@ use Comely\KnitException;
 abstract class Compiler
 {
     private $data;
+    private $modifiers;
 
     use ConfigTrait;
     use DataTrait;
@@ -26,9 +29,12 @@ abstract class Compiler
     public function __construct()
     {
         $this->data =   new Data();
+        $this->modifiers    =   new Repository();
     }
 
     /**
+     * Reads a template file
+     *
      * @param string $file
      * @return string
      * @throws KnitException
@@ -37,7 +43,7 @@ abstract class Compiler
     {
         // Get pathinfo of template file
         $fileInfo   =   pathinfo($file);
-        
+
         // Check extension
         $extension  =   $fileInfo["extension"] ?? "";
         if(!in_array($extension, Knit::FILES)) {
@@ -46,18 +52,40 @@ abstract class Compiler
 
         // Read
         try {
-            return $this->diskTemplate->read($file);
+            $tpl    =   $this->diskTemplate->read($file);
+
+            // Return template contents after cleansing
+            return str_replace(["<?","?>"], ["&lt;?","?&gt;"], $tpl);
         } catch(DiskException $e) {
             throw KnitException::readError($e->getMessage());
         }
     }
 
     /**
+     * @return array
+     */
+    public function getDelimiters() : array
+    {
+        return Knit::DELIMITERS;
+    }
+
+    /**
+     * @return Repository
+     */
+    public function getModifiers() : Repository
+    {
+        return $this->modifiers;
+    }
+
+    /**
      * @param string $tplFile
      * @return string
      */
-    private function compile(string $tplFile) : string
+    protected function compile(string $tplFile) : string
     {
-        
+        $parser   =   new Knit\Compiler\Template($this, $tplFile);
+        $this->diskCompiler->write("foo.php", $parser->getParsed());
+
+        return "";
     }
 }

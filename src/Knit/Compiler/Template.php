@@ -10,34 +10,30 @@ use Comely\Knit\Compiler;
  * Class Template
  * @package Comely\Knit\Compiler
  */
-class Template
+class Template extends AbstractParser
 {
-    private $file;
-    private $parsed;
-    private $timer;
-    private $timerStart;
+    protected $compiler;
+    protected $delimiters;
+    protected $file;
+    protected $parsed;
+    protected $source;
+    protected $timer;
 
     /**
      * Template constructor.
-     * @param Compiler $compiler
+     * @param Compiler $knit
      * @param string $file
      */
-    public function __construct(Compiler $compiler, string $file)
+    public function __construct(Compiler $knit, string $file)
     {
+        $this->compiler =   $knit;
+        $this->delimiters   =   $knit->getDelimiters();
         $this->file =   $file;
+        $this->parsed   =   "";
+        $this->source   =   $knit->read($file);
         $this->timer    =   0;
-        $this->timerStart   =   microtime(true);
-        $this->parsed   =   $this->parse(
-            $compiler->read($file)
-        );
-    }
 
-    /**
-     * @return string
-     */
-    public function getFile() : string
-    {
-        return $this->file;
+        parent::__construct();
     }
 
     /**
@@ -46,30 +42,5 @@ class Template
     public function getParsed() : string
     {
         return $this->parsed;
-    }
-
-    /**
-     * @return float
-     */
-    public function getTimer() : float
-    {
-        return $this->timer;
-    }
-
-    /**
-     * @param string $contents
-     * @return string
-     */
-    private function parse(string $contents) : string
-    {
-        // Parse line by line
-        $line   =   0;
-        $lines  =   preg_split("/[\r\n]+/", $contents);
-        var_dump($lines);
-    }
-
-    private function parseLine() : string
-    {
-
     }
 }

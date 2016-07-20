@@ -67,4 +67,13 @@ class KnitException extends \ComelyException
     {
         return new self(self::$componentId, $error, 1005);
     }
+
+    /**
+     * @param string $error
+     * @return KnitException
+     */
+    public static function parseError(string $error) : self
+    {
+        return new self(self::$componentId, $error, 1006);
+    }
 }

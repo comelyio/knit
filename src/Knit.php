@@ -27,7 +27,10 @@ class Knit extends Compiler implements Constants
         parent::checkPaths(__METHOD__);
 
         // Cache
+
+        // Fresh Compile
+        $parsed   =   parent::compile($file);
         
-        // 
+        return $parsed;
     }
 }
