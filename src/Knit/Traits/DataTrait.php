@@ -12,7 +12,7 @@ use Comely\KnitException;
  */
 trait DataTrait
 {
-    private $data;
+    protected $data;
 
     /**
      * @param string $key

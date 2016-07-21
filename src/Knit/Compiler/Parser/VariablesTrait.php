@@ -32,7 +32,7 @@ trait VariablesTrait
         unset($pieces[0]);
 
         // Check if its reserved variable (i.e. being used by foreach/count clause)
-        if(!in_array($var, $this->reserved)) {
+        if(!$this->reserved->has($var)) {
             // Load from assigned data
             $var    =   sprintf('$this->data["%s"]', substr($var, 1));
         }
@@ -106,7 +106,7 @@ trait VariablesTrait
      */
     private function reserveVariable(string $var)
     {
-        if(in_array($var, $this->reserved)) {
+        if($this->reserved->has($var)) {
             $this->throwException(
                 sprintf(
                     'variable %s is reserved by a previous count/foreach clause, use a different name',
@@ -115,8 +115,12 @@ trait VariablesTrait
             );
         }
 
+        if(in_array(strtolower($var), ['$this'])) {
+            $this->throwException(sprintf('Variable %s cannot be used by count/foreach clauses', $var));
+        }
+
         // Reserve variable
-        array_push($this->reserved, $var);
+        $this->reserved->add($var);
     }
 
     /**
@@ -125,10 +129,6 @@ trait VariablesTrait
      */
     private function releaseVariable(string $var)
     {
-        $key    =   array_search($var, $this->reserved);
-        if($key !== false) {
-            unset($this->reserved[$key]);
-            $this->reserved =   array_values($this->reserved); // Reindex?
-        }
+        $this->reserved->delete($var);
     }
 }

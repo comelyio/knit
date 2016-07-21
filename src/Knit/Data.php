@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Comely\Knit;
 
-use Comely\IO\Session\ComelySession\Proxy;
 use Comely\KnitException;
 
 /**
@@ -13,32 +12,34 @@ use Comely\KnitException;
 class Data
 {
     private $data;
-    private $internal;
-    private $internalKeys;
+    private $reservedKeys;
 
     /**
      * Data constructor.
      */
     public function __construct()
     {
-        $this->data =   [];
-        $this->internalKeys =   ["comely", "app"];
-        $this->internal =   [
-            "now"   =>  time(),
-            "this"  =>  "",
-            "get"   =>  isset($_GET) ? $_GET : [],
-            "post"  =>  isset($_POST) ? $_POST : [],
-            "session"   =>  isset($_SESSION) ? $_SESSION : []
+
+        $this->reservedKeys =   ["comely", "app"];
+        $this->data =   [
+            "comely"    =>   [
+                "now"   =>  time(),
+                "this"  =>  "",
+                "get"   =>  isset($_GET) ? $_GET : [],
+                "post"  =>  isset($_POST) ? $_POST : [],
+                "session"   =>  isset($_SESSION) ? $_SESSION : []
+            ]
         ];
+        $this->data["app"]  =   &$this->data["comely"];
     }
 
     /**
-     * @param Proxy $comelySession
+     * @param array $data
      * @return Data
      */
-    public function useComelySession(Proxy $comelySession) : self
+    public function setSessionData(array &$data) : self
     {
-        $this->internal["session"]  =   $comelySession->getBags()->getArray();
+        $this->data["comely"]["session"]  =   $data;
         return $this;
     }
 
@@ -53,7 +54,7 @@ class Data
         $key    =   strtolower($key);
 
         // Check if key is reserved
-        if(in_array($key, $this->internalKeys)) {
+        if(in_array($key, $this->reservedKeys)) {
             throw KnitException::reservedDataKey($key);
         }
 
@@ -73,22 +74,11 @@ class Data
     }
 
     /**
-     * @param string $key
-     * @return bool
+     * @return array
      */
-    public function get(string $key)
+    public function getArray() : array
     {
-        $key    =   strtolower($key);
-        return $this->data[$key] ?? null;
-    }
-
-    /**
-     * @param string $key
-     * @return bool
-     */
-    public function __get(string $key)
-    {
-        return $this->get($key);
+        return $this->data;
     }
 
     /**

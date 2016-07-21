@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Comely\Knit\Traits;
 
 use Comely\IO\Filesystem\Disk;
+use Comely\IO\Session\ComelySession\Proxy;
 use Comely\Knit;
 use Comely\KnitException;
 
@@ -13,9 +14,11 @@ use Comely\KnitException;
  */
 trait ConfigTrait
 {
-    private $diskTemplate;
-    private $diskCompiler;
-    private $diskCache;
+    protected $caching;
+    protected $diskTemplate;
+    protected $diskCompiler;
+    protected $diskCache;
+    protected $session;
 
     /**
      * @param string|Disk $path
@@ -44,6 +47,19 @@ trait ConfigTrait
 
         $this->diskTemplate =   $disk;
         return $this;
+    }
+
+    /**
+     * @return string
+     * @throws KnitException
+     */
+    public function getTemplatePath() : string
+    {
+        if(!isset($this->diskTemplate)) {
+            throw KnitException::pathNotSet(__METHOD__, "template", "setTemplatePath");
+        }
+
+        return $this->diskTemplate->getPath();
     }
 
     /**
@@ -76,6 +92,19 @@ trait ConfigTrait
     }
 
     /**
+     * @return string
+     * @throws KnitException
+     */
+    public function getCompilerPath() : string
+    {
+        if(!isset($this->diskCompiler)) {
+            throw KnitException::pathNotSet(__METHOD__, "compiler", "setCompilerPath");
+        }
+
+        return $this->diskCompiler->getPath();
+    }
+
+    /**
      * @param string|Disk $path
      * @return Knit
      * @throws KnitException
@@ -105,20 +134,37 @@ trait ConfigTrait
     }
 
     /**
-     * Makes sure that template and compiler paths are set
-     * @param string $method
+     * @return string
      * @throws KnitException
      */
-    protected function checkPaths(string $method)
+    public function getCachePath() : string
     {
-        // Path to template files
-        if(!isset($this->diskTemplate)) {
-            throw KnitException::pathNotSet($method, "template", "setTemplatePath");
+        if(!isset($this->diskCache)) {
+            throw KnitException::pathNotSet(__METHOD__, "cache", "setCachePath");
         }
+        
+        return $this->diskCache->getPath();
+    }
 
-        // Path to compiler's working directory
-        if(!isset($this->diskCompiler)) {
-            throw KnitException::pathNotSet($method, "compiler", "setCompilerPath");
-        }
+    /**
+     * @param int $flag
+     * @return Knit
+     */
+    public function setCaching(int $flag) : Knit
+    {
+        $this->caching  =   ($flag   === Knit::CACHE_DYNAMIC) ? Knit::CACHE_DYNAMIC : Knit::CACHE_STATIC;
+        return $this;
+    }
+
+    /**
+     * @param Proxy $session
+     * @return Knit
+     */
+    public function useComelySession(Proxy $session) : Knit
+    {
+        $this->session  =   $session;
+        $bag    =   $session->getBags()->getArray();
+        $this->data->setSessionData($bag);
+        return $this;
     }
 }

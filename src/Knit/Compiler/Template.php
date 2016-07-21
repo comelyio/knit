@@ -26,6 +26,8 @@ class Template extends AbstractParser
      */
     public function __construct(Compiler $knit, string $file)
     {
+        $knit->checkPaths(__METHOD__); // Verifies that proper paths are set
+
         $this->compiler =   $knit;
         $this->delimiters   =   $knit->getDelimiters();
         $this->file =   $file;
@@ -42,5 +44,13 @@ class Template extends AbstractParser
     public function getParsed() : string
     {
         return $this->parsed;
+    }
+
+    /**
+     * @return float
+     */
+    public function getTimer() : float
+    {
+        return $this->timer;
     }
 }

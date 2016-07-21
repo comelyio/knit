@@ -1,8 +1,7 @@
 {
   "name": "comelyio/knit",
-  "description": "Template Engine",
-  "minimum-stability": "alpha",
-  "keywords": ["comely", "knit", "template engine"],
+  "description": "Knit is fast, secure and reliable templating engine for PHP 7 apps",
+  "keywords": ["comely", "knit", "templating"],
   "license": "MIT",
   "authors": [
     {
@@ -10,6 +9,7 @@
       "email": "mfsid@comely.io"
     }
   ],
+  "minimum-stability": "alpha",
   "require": {
     "comelyio/comely": "*"
   },

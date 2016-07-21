@@ -4,11 +4,14 @@ declare(strict_types=1);
 namespace Comely\Knit;
 
 use Comely\IO\DependencyInjection\Repository;
+use Comely\IO\Filesystem\Disk;
 use Comely\IO\Filesystem\Exception\DiskException;
 use Comely\Knit;
+use Comely\Knit\Compiler\ReservedVariables;
+use Comely\Knit\Traits\ActionsTrait;
+use Comely\Knit\Traits\CacheTrait;
 use Comely\Knit\Traits\ConfigTrait;
 use Comely\Knit\Traits\DataTrait;
-
 use Comely\KnitException;
 
 /**
@@ -17,9 +20,11 @@ use Comely\KnitException;
  */
 abstract class Compiler
 {
-    private $data;
     private $modifiers;
+    private $reserved;
 
+    use ActionsTrait;
+    use CacheTrait;
     use ConfigTrait;
     use DataTrait;
 
@@ -30,6 +35,7 @@ abstract class Compiler
     {
         $this->data =   new Data();
         $this->modifiers    =   new Repository();
+        $this->reserved =   new ReservedVariables();
     }
 
     /**
@@ -78,14 +84,48 @@ abstract class Compiler
     }
 
     /**
+     * @return ReservedVariables
+     */
+    public function getReservedVariables() : ReservedVariables
+    {
+        return $this->reserved;
+    }
+
+    /**
      * @param string $tplFile
+     * @param string $outputScript
      * @return string
      */
-    protected function compile(string $tplFile) : string
+    protected function compile(string $tplFile, string $outputScript) : string
     {
-        $parser   =   new Knit\Compiler\Template($this, $tplFile);
-        $this->diskCompiler->write("foo.php", $parser->getParsed());
+        // Parse template file
+        $parser =   new Knit\Compiler\Template($this, $tplFile);
 
-        return "";
+        // Prepend parsed template
+        $parsed =   sprintf('<?php%2$sdefine("COMELY_KNIT", "%1$s");%2$s', Knit::VERSION, Knit::EOL);
+        $parsed .=  sprintf('define("COMELY_KNIT_PARSE_TIMER", %1$s);%2$s', $parser->getTimer(), Knit::EOL);
+        $parsed .=  sprintf('define("COMELY_KNIT_COMPILED_ON", %1$s);%2$s?>%2$s', microtime(true), Knit::EOL);
+        $parsed .=  $parser->getParsed();
+
+        // Write compiled PHP script
+        $outputScript   .=  sprintf("_%d.php", mt_rand(0,100));
+        $this->diskCompiler->write($outputScript, $parsed, Disk::WRITE_FLOCK);
+
+        return $this->diskCompiler->getPath() . $outputScript;
+    }
+
+    /**
+     * @param string $script
+     * @param array $data
+     * @return Sandbox
+     * @throws KnitException
+     */
+    protected function runSandbox(string $script, array $data) : Sandbox
+    {
+        try {
+            return new Sandbox($script, $data);
+        } catch(\Throwable $e) {
+            throw KnitException::sandBoxError($e->getMessage());
+        }
     }
 }

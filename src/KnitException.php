@@ -76,4 +76,22 @@ class KnitException extends \ComelyException
     {
         return new self(self::$componentId, $error, 1006);
     }
+
+    /**
+     * @param string $error
+     * @return KnitException
+     */
+    public static function sandBoxError(string $error) : self
+    {
+        return new self(self::$componentId . "\\Sandbox", $error, 1007);
+    }
+
+    /**
+     * @param string $error
+     * @return KnitException
+     */
+    public static function cacheError(string $error) : self
+    {
+        return new self(self::$componentId, $error, 1008);
+    }
 }

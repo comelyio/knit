@@ -23,6 +23,7 @@ abstract class AbstractParser
     use Knit\Compiler\Parser\CountTrait;
     use Knit\Compiler\Parser\ForeachTrait;
     use Knit\Compiler\Parser\IfTrait;
+    use Knit\Compiler\Parser\IncludeTrait;
     use Knit\Compiler\Parser\PrintTrait;
     use Knit\Compiler\Parser\VariablesTrait;
 
@@ -36,7 +37,7 @@ abstract class AbstractParser
         $this->lineNum  =   0;
         $this->literalMode  =   false;
         $this->modifiers    =   $this->compiler->getModifiers();
-        $this->reserved =   [];
+        $this->reserved =   $this->compiler->getReservedVariables();
         $this->token    =   null;
 
         // Parse template
@@ -106,8 +107,8 @@ abstract class AbstractParser
                             return $this->parseCount();
                         } elseif(strtolower($this->token) === "/count") {
                             return $this->parseCountClose();
-                        } elseif(preg_match("/^include\sfile=('|\")[a-z0-9-_.]+('|\")$/i", $this->token)) {
-                            // Include file
+                        } elseif(preg_match('/^include\sknit=(\'|\")[a-z0-9-_.]+(\'|\")$/i', $this->token)) {
+                            return $this->parseIncludeKnit();
                         } elseif(strtolower($this->token) === "literal") {
                             $this->literalMode   =   true;
                             return "";
@@ -137,7 +138,7 @@ abstract class AbstractParser
     {
         throw KnitException::parseError(
             sprintf(
-                'Parsing error "%1$s" in template file "%2$s" on line # %4$s near "%5$s"',
+                'Parsing error "%1$s" in template file "%2$s" on line # %4$d near "%5$s"',
                 $message,
                 basename($this->file),
                 $this->file,
