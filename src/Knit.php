@@ -29,7 +29,7 @@ class Knit extends Compiler implements Constants
 
         // Knit filename
         $knittedFileName    =   $this->getKnittedFilename($file);
-
+        
         // Cache
         if($ttl >   0) {
             $sandBox    =   $this->cacheRead($knittedFileName, $ttl);

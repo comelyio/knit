@@ -93,6 +93,8 @@ abstract class AbstractParser
                             return $this->parsePrint();
                         } elseif(preg_match('/^if\s.+$/i', $this->token)) {
                             return $this->parseIf();
+                        } elseif(preg_match('/^elseif\s.+$/i', $this->token)) {
+                            return $this->parseElseIf();
                         } elseif(strtolower($this->token) === "else") {
                             return $this->parseIfElse();
                         } elseif(strtolower($this->token) === "/if") {

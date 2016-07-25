@@ -24,6 +24,8 @@ class Sandbox
      */
     public function __construct(string $knitCompiledPhp, array $data = [])
     {
+        $this->data =   $data;
+
         $startTimer =   microtime(true);
         ob_start();
         include $knitCompiledPhp;

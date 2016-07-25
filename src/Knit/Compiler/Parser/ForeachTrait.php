@@ -21,7 +21,7 @@ trait ForeachTrait
 
         // Return foreach statement
         $this->clauses["foreach"][] =   ["close" => 2, "var" => $index];
-        return sprintf('<?php if(isset(%1$s) && is_array(%1$s)) { foreach(%1$s as %2$s) { ?>', $array, $index);
+        return sprintf('<?php if(isset(%1$s) && is_array(%1$s)  &&  count(%1$s) > 0) { foreach(%1$s as %2$s) { ?>', $array, $index);
     }
 
     /**
