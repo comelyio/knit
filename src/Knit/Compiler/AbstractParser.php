@@ -100,7 +100,7 @@ abstract class AbstractParser
                     $this->token    =   preg_replace("/\s+/", " ", $this->token);
                     // Check if in literal mode
                     if(!$this->literalMode) {
-                        if(preg_match('/^\$[a-z\_][a-z0-9\_\.\|\:\'\$]+$/', $this->token)) {
+                        if(preg_match('/^\$[a-z\_][a-z0-9\_\.\|\:\'\$]+$/i', $this->token)) {
                             return $this->parsePrint();
                         } elseif(preg_match('/^if\s.+$/i', $this->token)) {
                             return $this->parseIf();

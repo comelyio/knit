@@ -45,7 +45,7 @@ trait VariablesTrait
         // Check if its reserved variable (i.e. being used by foreach/count clause)
         if(!$this->reserved->has($var)) {
             // Load from assigned data
-            $var    =   sprintf('$this->data["%s"]', substr($var, 1));
+            $var    =   sprintf('$this->data["%s"]', strtolower(substr($var, 1)));
         }
 
         // Assemble pieces array style

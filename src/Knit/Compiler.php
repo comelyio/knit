@@ -115,7 +115,7 @@ abstract class Compiler
         // Prepend parsed template
         $parsed =   sprintf('<?php%2$sdefine("COMELY_KNIT", "%1$s");%2$s', Knit::VERSION, Knit::EOL);
         $parsed .=  sprintf('define("COMELY_KNIT_PARSE_TIMER", %1$s);%2$s', $parser->getTimer(), Knit::EOL);
-        $parsed .=  sprintf('define("COMELY_KNIT_COMPILED_ON", %1$s);%2$s?>%2$s', microtime(true), Knit::EOL);
+        $parsed .=  sprintf('define("COMELY_KNIT_COMPILED_ON", %1$s);%2$s?>', microtime(true), Knit::EOL);
         $parsed .=  $parser->getParsed();
 
         // Write compiled PHP script
