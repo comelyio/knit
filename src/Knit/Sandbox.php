@@ -124,6 +124,6 @@ class Sandbox
      */
     public function getOutput() : string
     {
-        return $this->output;
+        return trim($this->output);
     }
 }
