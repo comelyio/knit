@@ -55,9 +55,11 @@ trait VariablesTrait
 
         // Apply modifiers
         foreach($modifiers as $modifier) {
-            $opts   =   explode(":", $modifier);
-            $modifier   =   $opts[0];
+            preg_match_all("~'[^']++'|\([^)]++\)|[^:]++~", $modifier, $modifier);
+            $modifier   =   $modifier[0];
+            $opts   =   $modifier;
             unset($opts[0]);
+            $modifier   =   $modifier[0];
 
             // Check modifier args
             $opts   =   array_values($opts);
