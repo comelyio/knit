@@ -21,59 +21,71 @@ namespace Comely\Knit\Compiler\Parser;
 trait IfTrait
 {
     /**
-     * Start if statement
+     * @param bool $isElseIf
      * @return string
      */
-    private function parseIf() : string
+    private function parseIf(bool $isElseIf = false) : string
     {
-        $pieces =   preg_split('/\s/', $this->token);
-        $statement[]    =   $this->resolveOperand($pieces[1], "left", true);
+        $divider    =   "";
+        $statement  =   $isElseIf ? '<?php elseif(' : '<?php if(';
 
-        if(array_key_exists(2, $pieces)) {
-            // Operator
-            if(!in_array($pieces[2], ["===","==","!=","!==",">=","<="])) {
-                $this->throwException(sprintf('Operator %s not supported', $pieces[2]));
-            }
-
-            $statement[]   =   $pieces[2];
-
-            if(!array_key_exists(3, $pieces)) {
-                $this->throwException("Missing right operand");
-            }
-
-            $statement[]    =   $this->resolveOperand($pieces[3], "right", false);
+        // Check if IF statement has && or ||
+        if(preg_match('/\s+\&{2}\s+/', $this->token)) {
+            $divider    .=  "&";
         }
 
-        $this->clauses["ifs"]++;
-        return sprintf('<?php if(%s) { ?>', implode(" ", $statement));
+        if(preg_match('/\s+\|{2}\s+/', $this->token)) {
+            $divider    .=  "|";
+        }
+
+        // IF statements cannot have both && and ||
+        if(strlen($divider) ==  2) {
+            $this->throwException('If statement cannot have both "&&" and "||"');
+        }
+
+        // Split IF statement for parsing
+        $tokenOffset =  $isElseIf ? 7 : 3; // "elseif " (7) or "if " (3)
+        $token  =   substr($this->token, $tokenOffset);
+        $tokens =   $divider ? preg_split(sprintf('/\s+\%s{2}\s+/', $divider), $token) : [$token];
+
+        $pieces =   [];
+        foreach($tokens as $token) {
+            $pieces[]   =   $this->parseIfStatement(trim($token));
+        }
+
+        $statement  .=   implode(sprintf(' %s ', str_repeat($divider, 2)), $pieces);
+
+        if(!$isElseIf) {
+            $this->clauses["ifs"]++;
+        }
+
+        return $statement . ') { ?>';
     }
 
     /**
+     * @param string $token
      * @return string
-     * @throws \Comely\KnitException
      */
-    private function parseElseIf() : string
+    private function parseIfStatement(string $token) : string
     {
-        $pieces =   preg_split('/\s/', $this->token);
-        $statement[]    =   $this->resolveOperand($pieces[1], "left", true);
-
-        if(array_key_exists(2, $pieces)) {
+        $pieces =   preg_split('/\s+/', $token);
+        $statement[]    =   $this->resolveOperand($pieces[0], "left", true);
+        if(array_key_exists(1, $pieces)) {
             // Operator
-            if(!in_array($pieces[2], ["===","==","!=","!==",">=","<="])) {
+            if(!in_array($pieces[1], ["===","==","!=","!==",">=","<="])) {
                 $this->throwException(sprintf('Operator %s not supported', $pieces[2]));
             }
 
-            $statement[]   =   $pieces[2];
+            $statement[]   =   $pieces[1];
 
-            if(!array_key_exists(3, $pieces)) {
+            if(!array_key_exists(2, $pieces)) {
                 $this->throwException("Missing right operand");
             }
 
-            $statement[]    =   $this->resolveOperand($pieces[3], "right", false);
+            $statement[]    =   $this->resolveOperand($pieces[2], "right", false);
         }
 
-        $this->clauses["ifs"]++;
-        return sprintf('<?php } elseif(%s) { ?>', implode(" ", $statement));
+        return implode(" ", $statement);
     }
 
     /**
@@ -89,7 +101,7 @@ trait IfTrait
         if($negate  &&  !$canNegate) {
             $this->throwException(sprintf('Cannot use ! in %s operand', $which));
         }
-        
+
         // Resolve operand
         if(preg_match('/^\!?\$[a-z\_]+[a-z0-9\_\.\:\|\$\']*$/i', $operand)) {
             // Single variable

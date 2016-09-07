@@ -103,9 +103,9 @@ abstract class AbstractParser
                         if(preg_match('/^\$[a-z\_][a-z0-9\_\.\|\:\-\s\'\$]+$/i', $this->token)) {
                             return $this->parsePrint();
                         } elseif(preg_match('/^if\s.+$/i', $this->token)) {
-                            return $this->parseIf();
+                            return $this->parseIf(false);
                         } elseif(preg_match('/^elseif\s.+$/i', $this->token)) {
-                            return $this->parseElseIf();
+                            return $this->parseIf(true);
                         } elseif(strtolower($this->token) === "else") {
                             return $this->parseIfElse();
                         } elseif(strtolower($this->token) === "/if") {
