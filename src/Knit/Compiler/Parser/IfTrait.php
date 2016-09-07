@@ -27,7 +27,7 @@ trait IfTrait
     private function parseIf(bool $isElseIf = false) : string
     {
         $divider    =   "";
-        $statement  =   $isElseIf ? '<?php elseif(' : '<?php if(';
+        $statement  =   $isElseIf ? '<?php } elseif(' : '<?php if(';
 
         // Check if IF statement has && or ||
         if(preg_match('/\s+\&{2}\s+/', $this->token)) {
