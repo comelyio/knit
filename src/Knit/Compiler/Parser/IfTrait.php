@@ -72,7 +72,7 @@ trait IfTrait
         $statement[]    =   $this->resolveOperand($pieces[0], "left", true);
         if(array_key_exists(1, $pieces)) {
             // Operator
-            if(!in_array($pieces[1], ["===","==","!=","!==",">=","<="])) {
+            if(!in_array($pieces[1], ["===","==","!=","!==",">=","<=",">","<"])) {
                 $this->throwException(sprintf('Operator %s not supported', $pieces[2]));
             }
 

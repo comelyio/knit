@@ -20,7 +20,7 @@ namespace Comely\Knit;
  */
 interface Constants
 {
-    const VERSION   =   "1.0.3-beta";
+    const VERSION   =   "1.0.4-RC1";
     const DS    =   DIRECTORY_SEPARATOR;
     const EOL   =   PHP_EOL;
 
