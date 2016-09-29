@@ -20,6 +20,7 @@ namespace Comely\Knit\Compiler;
  */
 class ReservedVariables
 {
+    /** @var array */
     private $vars   =   [];
 
     /**

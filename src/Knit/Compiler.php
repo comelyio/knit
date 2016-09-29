@@ -31,7 +31,9 @@ use Comely\KnitException;
  */
 abstract class Compiler
 {
+    /** @var Repository */
     private $modifiers;
+    /** @var ReservedVariables */
     private $reserved;
 
     use ActionsTrait;

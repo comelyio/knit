@@ -23,11 +23,17 @@ use Comely\Knit\Compiler;
  */
 class Template extends AbstractParser
 {
+    /** @var Compiler */
     protected $compiler;
+    /** @var array */
     protected $delimiters;
+    /** @var string */
     protected $file;
+    /** @var string */
     protected $parsed;
+    /** @var string */
     protected $source;
+    /** @var int */
     protected $timer;
 
     /**

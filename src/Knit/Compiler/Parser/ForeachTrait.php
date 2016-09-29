@@ -14,6 +14,10 @@ declare(strict_types=1);
 
 namespace Comely\Knit\Compiler\Parser;
 
+/**
+ * Class ForeachTrait
+ * @package Comely\Knit\Compiler\Parser
+ */
 trait ForeachTrait
 {
     /**

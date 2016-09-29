@@ -23,8 +23,11 @@ use Comely\KnitException;
  */
 class Sandbox
 {
+    /** @var array */
     private $data;
+    /** @var string */
     private $output;
+    /** @var array */
     private $timers;
 
     /**

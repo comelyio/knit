@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Comely\Knit\Compiler;
 
+use Comely\IO\DependencyInjection\Repository;
 use Comely\Knit;
 use Comely\KnitException;
 
@@ -23,12 +24,19 @@ use Comely\KnitException;
  */
 abstract class AbstractParser
 {
+    /** @var array */
     private $clauses;
+    /** @var null|string */
     private $line;
+    /** @var int */
     private $lineNum;
+    /** @var bool */
     private $literalMode;
+    /** @var Repository */
     private $modifiers;
+    /** @var ReservedVariables */
     private $reserved;
+    /** @var null|string */
     private $token;
 
     use Knit\Compiler\Parser\CountTrait;

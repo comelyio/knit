@@ -20,6 +20,7 @@ namespace Comely;
  */
 class KnitException extends \ComelyException
 {
+    /** @var string */
     protected static $componentId   =   "Comely\\Knit";
 
     /**

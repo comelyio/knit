@@ -13,6 +13,7 @@
 declare(strict_types=1);
 
 namespace Comely\Knit\Compiler\Parser;
+
 use Comely\Knit\Compiler\Template;
 use Comely\KnitException;
 
