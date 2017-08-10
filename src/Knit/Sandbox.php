@@ -14,7 +14,6 @@ declare(strict_types=1);
 
 namespace Comely\Knit;
 
-use Comely\Knit;
 use Comely\KnitException;
 
 /**
@@ -42,6 +41,7 @@ class Sandbox
 
         $startTimer =   microtime(true);
         ob_start();
+        /** @noinspection PhpIncludeInspection */
         include $knitCompiledPhp;
         $this->output =   ob_get_contents();
         ob_end_clean();
@@ -54,13 +54,27 @@ class Sandbox
             throw KnitException::sandBoxError("Bad or incomplete Knit compiled script");
         }
 
-        if(!is_float(COMELY_KNIT_PARSE_TIMER)   ||  !is_float(COMELY_KNIT_COMPILED_ON)) {
-            throw KnitException::sandBoxError("Compiled PHP script is missing timestamps");
+        if(!is_float(COMELY_KNIT_PARSE_TIMER)   &&  !is_int(COMELY_KNIT_PARSE_TIMER)) {
+            throw KnitException::sandBoxError(
+                sprintf(
+                    'Compiled PHP timer 1 must be float, got "%1$s"',
+                    gettype(COMELY_KNIT_PARSE_TIMER)
+                )
+            );
+        }
+
+        if(!is_float(COMELY_KNIT_COMPILED_ON)   &&  !is_int(COMELY_KNIT_COMPILED_ON)) {
+            throw KnitException::sandBoxError(
+                sprintf(
+                    'Compiled PHP timer 2 must be float, got "%1$s"',
+                    gettype(COMELY_KNIT_COMPILED_ON)
+                )
+            );
         }
 
         $this->timers   =   [
-            COMELY_KNIT_PARSE_TIMER,
-            COMELY_KNIT_COMPILED_ON,
+            (float) COMELY_KNIT_PARSE_TIMER,
+            (float) COMELY_KNIT_COMPILED_ON,
             microtime(true)-$startTimer
         ];
     }
