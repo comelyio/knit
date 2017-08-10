@@ -20,8 +20,8 @@ namespace Comely\Knit;
  */
 interface Constants
 {
-    /** string Version (Major.Minor.Release-Suffix) */
-    const VERSION   =   "1.0.0-RC5";
+    /** string Version (Major.Minor.Release) */
+    const VERSION   =   "1.0.0";
     /** int Version (Major * 10000 + Minor * 100 + Release) */
     const VERSION_ID    =   10000;
 
