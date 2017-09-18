@@ -17,15 +17,13 @@ namespace Comely\Knit\Modifiers;
 use Comely\Knit\AbstractModifier;
 
 /**
- * Class Trim
+ * Class JsonEncode
  * @package Comely\Knit\Modifiers
  */
-class Trim extends AbstractModifier
+class JsonEncode extends AbstractModifier
 {
-    const CALL  =   "trim";
+    const CALL  =   "json_encode";
     const MIN_ARGS  =   0;
-    const MAX_ARGS  =   1;
-    const ARGS  =   [
-        ["str", " \t\n\r\0\x0B"]
-    ];
+    const MAX_ARGS  =   0;
+    const ARGS  =   [];
 }
