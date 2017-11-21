@@ -28,7 +28,7 @@ trait IncludeTrait
      * @return string
      * @throws KnitException
      */
-    public function parseIncludeKnit() : string
+    public function parseInclude() : string
     {
         // exp: include knit="file.knit"
         $pieces =   preg_split('/\s/', $this->token);
@@ -37,6 +37,32 @@ trait IncludeTrait
         // Return parsed template file
         try {
             return (new Template($this->compiler, $knit))->getParsed();
+        } catch(KnitException $e) {
+            throw KnitException::parseError(
+                sprintf(
+                    '%1$s included in "%2$s" on line # %4$d',
+                    $e->getMessage(),
+                    basename($this->file),
+                    $this->file,
+                    $this->lineNum
+                )
+            );
+        }
+    }
+
+    /**
+     * Quick knitting include
+     * @return string
+     * @throws KnitException
+     */
+    public function parseQuickKnit() : string
+    {
+        // exp: knit "file" or knit"file"
+        $knit   =   trim(substr($this->token, 5), ' \'"/-_.');
+
+        // Return parsed template file
+        try {
+            return (new Template($this->compiler, $knit . ".knit"))->getParsed();
         } catch(KnitException $e) {
             throw KnitException::parseError(
                 sprintf(

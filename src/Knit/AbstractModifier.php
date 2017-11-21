@@ -22,6 +22,11 @@ use Comely\KnitException;
  */
 abstract class AbstractModifier
 {
+    const CALL  =   "";
+    const MIN_ARGS  =   0;
+    const MAX_ARGS  =   0;
+    const ARGS  =   [];
+
     /**
      * @param string $input
      * @param array $args

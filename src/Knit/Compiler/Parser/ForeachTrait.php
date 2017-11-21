@@ -36,7 +36,33 @@ trait ForeachTrait
 
         // Return foreach statement
         $this->clauses["foreach"][] =   ["close" => 2, "var" => $index];
-        return sprintf('<?php if(isset(%1$s) && is_array(%1$s)  &&  count(%1$s) > 0) { foreach(%1$s as %2$s) { ?>', $array, $index);
+        return sprintf(
+            '<?php if(isset(%1$s) && is_array(%1$s)  &&  count(%1$s) > 0) { foreach(%1$s as %2$s) { ?>',
+            $array,
+            $index
+        );
+    }
+
+    private function parseForeachPaired() : string
+    {
+        // exp: foreach $arr as $key => $val
+        $pieces =   preg_split('/\s/', $this->token);
+        $array  =   $this->resolveVariable($pieces[1]);
+        $key    =   $pieces[3];
+        $val    =   $pieces[5];
+
+        // Reserve variables
+        $this->reserveVariable($key);
+        $this->reserveVariable($val);
+
+        // Return foreach statement
+        $this->clauses["foreach"][] =   ["close" => 2, "var" => $key, "var2" => $val];
+        return sprintf(
+            '<?php if(isset(%1$s) && is_array(%1$s)  &&  count(%1$s) > 0) { foreach(%1$s as %2$s => %3$s) { ?>',
+            $array,
+            $key,
+            $val
+        );
     }
 
     /**
@@ -74,6 +100,9 @@ trait ForeachTrait
 
         $clause =   array_pop($this->clauses["foreach"]);
         $this->releaseVariable($clause["var"]);
+        if(array_key_exists("var2", $clause)    &&  is_string($clause["var2"])) {
+            $this->releaseVariable($clause["var2"]);
+        }
 
         return sprintf(
             '<?php %1$s unset(%2$s); ?>',

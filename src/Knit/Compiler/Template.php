@@ -14,7 +14,6 @@ declare(strict_types=1);
 
 namespace Comely\Knit\Compiler;
 
-use Comely\Knit;
 use Comely\Knit\Compiler;
 
 /**
@@ -23,19 +22,6 @@ use Comely\Knit\Compiler;
  */
 class Template extends AbstractParser
 {
-    /** @var Compiler */
-    protected $compiler;
-    /** @var array */
-    protected $delimiters;
-    /** @var string */
-    protected $file;
-    /** @var string */
-    protected $parsed;
-    /** @var string */
-    protected $source;
-    /** @var int */
-    protected $timer;
-
     /**
      * Template constructor.
      * @param Compiler $knit

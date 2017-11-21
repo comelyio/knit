@@ -17,34 +17,26 @@ namespace Comely\Knit\Modifiers;
 use Comely\Knit\AbstractModifier;
 
 /**
- * Class Translate
+ * Class Key
  * @package Comely\Knit\Modifiers
  */
-class Translate extends AbstractModifier
+class ArrayKey extends AbstractModifier
 {
-    const CALL  =   "__";
+    const CALL  =   "";
     const MIN_ARGS  =   1;
-    const MAX_ARGS  =   2;
+    const MAX_ARGS  =   1;
     const ARGS  =   [
-        ["str"],
-        ["str", ""]
+        "~" =>  0
     ];
 
     /**
      * @param string $input
      * @param array $args
      * @return string
-     * @throws \Comely\KnitException
      */
     public function apply(string $input, array $args) : string
     {
-        $args   =   $this->assertArgs($args);
-        $dynamicKey =   $args[1] ?? null;
-
-        if(empty($dynamicKey)) {
-            return sprintf("%s('%s')", self::CALL, $args[0]);
-        }
-
-        return sprintf("%s(sprintf('%s', %s))", self::CALL, $args[0], $args[1]);
+        //$args   =   $this->assertArgs($args);
+        return sprintf('%s[%s]', $input, $args[0]);
     }
 }

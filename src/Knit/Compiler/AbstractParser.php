@@ -39,6 +39,19 @@ abstract class AbstractParser
     /** @var null|string */
     private $token;
 
+    /** @var Knit\Compiler */
+    protected $compiler;
+    /** @var array */
+    protected $delimiters;
+    /** @var string */
+    protected $file;
+    /** @var string */
+    protected $parsed;
+    /** @var string */
+    protected $source;
+    /** @var int */
+    protected $timer;
+
     use Knit\Compiler\Parser\CountTrait;
     use Knit\Compiler\Parser\ForeachTrait;
     use Knit\Compiler\Parser\IfTrait;
@@ -108,7 +121,7 @@ abstract class AbstractParser
                     $this->token    =   preg_replace("/\s+/", " ", $this->token);
                     // Check if in literal mode
                     if(!$this->literalMode) {
-                        if(preg_match('/^\$[a-z\_][a-z0-9\_\.\|\:\-\s\'\$]+$/i', $this->token)) {
+                        if(preg_match('/^\$[a-z\_][a-z0-9\_\.\|\:\-\s\'\$\%]+$/i', $this->token)) {
                             return $this->parsePrint();
                         } elseif(preg_match('/^if\s.+$/i', $this->token)) {
                             return $this->parseIf(false);
@@ -120,7 +133,9 @@ abstract class AbstractParser
                             return $this->parseIfClose();
                         } elseif(preg_match('/^foreach\s\$[a-z\_]+[a-z0-9\_\.]*\sas\s\$[a-z]+[a-z0-9\_]*$/i', $this->token)) {
                             return $this->parseForeach();
-                        } elseif(strtolower($this->token) === "foreachelse") {
+                        } elseif(preg_match('/^foreach\s\$[a-z\_]+[a-z0-9\_\.]*\sas\s\$[a-z]+[a-z0-9\_]*\s\=\>\s\$[a-z]+[a-z0-9\_]*$/i', $this->token)) {
+                            return $this->parseForeachPaired();
+                        }elseif(strtolower($this->token) === "foreachelse") {
                             return $this->parseForeachElse();
                         } elseif(strtolower($this->token) === "/foreach") {
                             return $this->parseForeachClose();
@@ -129,9 +144,11 @@ abstract class AbstractParser
                         } elseif(strtolower($this->token) === "/count") {
                             return $this->parseCountClose();
                         } elseif(preg_match('/^include\sknit=(\'|\")[a-z0-9-_.\/]+(\'|\")$/i', $this->token)) {
-                            return $this->parseIncludeKnit();
+                            return $this->parseInclude();
                         } elseif(preg_match('/^knit\sfile=(\'|\")[a-z0-9-_.\/]+(\'|\")$/i', $this->token)) {
-                            return $this->parseIncludeKnit();
+                            return $this->parseInclude();
+                        } elseif(preg_match('/^knit\s?(\'|\")[a-z0-9-_.\/]+(\'|\")$/i', $this->token)) {
+                            return $this->parseQuickKnit();
                         } elseif(strtolower($this->token) === "literal") {
                             $this->literalMode   =   true;
                             return "";
