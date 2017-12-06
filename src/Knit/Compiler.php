@@ -63,11 +63,13 @@ abstract class Compiler
     /**
      * @param string $key
      * @param $value
-     * @return Compiler
+     * @return Knit
+     * @throws KnitException
      */
-    public function assign(string $key, $value) : self
+    public function assign(string $key, $value) : Knit
     {
         $this->data->set($key, $value);
+        /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $this;
     }
 

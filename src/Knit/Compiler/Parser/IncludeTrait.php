@@ -58,7 +58,7 @@ trait IncludeTrait
     public function parseQuickKnit() : string
     {
         // exp: knit "file" or knit"file"
-        $knit   =   trim(substr($this->token, 5), ' \'"/-_.');
+        $knit   =   trim(substr($this->token, 5), ' \'"/-.');
 
         // Return parsed template file
         try {

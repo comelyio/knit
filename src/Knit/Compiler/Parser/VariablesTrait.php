@@ -90,7 +90,7 @@ trait VariablesTrait
                     function($repo, $key) {
                         // Modifier not instantiated yet
                         $modifierClass  =   sprintf(
-                            'Comely\\Knit\\Modifiers\\%s',
+                            'Comely\Knit\Modifiers\%s',
                             \Comely::pascalCase($key)
                         );
 

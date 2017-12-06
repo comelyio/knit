@@ -77,7 +77,7 @@ abstract class AbstractParser
     }
 
     /**
-     * @throws KnitException
+     * Breakdown to lines and start parsing
      */
     public function parse()
     {
