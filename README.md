@@ -1,13 +1,13 @@
 # Comely KNIT
 
-https://github.com/comelyio/knit
 
-Knit is fast, secure and reliable templating engine for PHP 7 apps
+Knit is fast, secure and reliable templating engine for Coemly apps.
 
 ## Prerequisites
 
-* **PHP** 7.0+
-* [**Comely IO** Components](https://github.com/comelyio/comely) >= 1.0.2
+* **PHP** 7.1+
+* [comelyio/**comely-kernel**](https://github.com/comelyio/comely-kernel)
+* [comelyio/**file-system**](https://github.com/comelyio/comely-kernel)
 
 ## Installation
 

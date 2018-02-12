@@ -1,6 +1,6 @@
 {
   "name": "comelyio/knit",
-  "description": "Knit is fast, secure and reliable templating engine for PHP 7 apps",
+  "description": "Knit is fast, secure and reliable templating engine for Comely apps",
   "keywords": ["comely", "comelyio", "knit", "templating"],
   "license": "MIT",
   "authors": [
@@ -10,13 +10,14 @@
     }
   ],
   "require": {
-    "php": ">=7.0.0",
-    "comelyio/comely": ">=1.0.2"
+    "php": ">=7.1.0",
+    "comelyio/comely-kernel": "*",
+    "comelyio/file-system": "*"
   },
   "autoload": {
     "psr-4": {
-      "Comely\\Knit\\": "src/Knit/"
+      "Comely\\Knit\\": "src"
     },
-    "files": ["src/Knit.php", "src/KnitException.php"]
+    "minimum-stability": "dev"
   }
 }
