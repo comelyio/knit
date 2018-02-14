@@ -14,6 +14,13 @@ declare(strict_types=1);
 
 namespace Comely\Knit;
 
+use Comely\IO\FileSystem\Disk\File;
+use Comely\IO\FileSystem\Exception\DiskException;
+use Comely\Knit\Compiler\CompiledTemplate;
+use Comely\Knit\Compiler\Parser;
+use Comely\Knit\Exception\CompilerException;
+use Comely\Knit\Template\Data;
+
 /**
  * Class Compiler
  * @package Comely\Knit
@@ -22,17 +29,28 @@ class Compiler
 {
     /** @var Knit */
     private $knit;
-    /** @var Template */
-    private $template;
+    /** @var File */
+    private $file;
+    /** @var Data */
+    private $data;
 
     /**
      * Compiler constructor.
      * @param Knit $knit
-     * @param Template $template
+     * @param File $file
+     * @param Data $data
      */
-    public function __construct(Knit $knit, Template $template)
+    public function __construct(Knit $knit, File $file, Data $data)
     {
         $this->knit = $knit;
-        $this->template = $template;
+        $this->file = $file;
+        $this->data = $data;
     }
+
+    public function compile(): CompiledTemplate
+    {
+
+    }
+
+
 }
