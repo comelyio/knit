@@ -15,10 +15,12 @@ declare(strict_types=1);
 namespace Comely\Knit\Compiler;
 
 use Comely\Knit\Compiler\Parser\ParseCount;
+use Comely\Knit\Compiler\Parser\ParseForeach;
 use Comely\Knit\Compiler\Parser\ParseIf;
 use Comely\Knit\Compiler\Parser\ParseImport;
 use Comely\Knit\Compiler\Parser\ParsePrint;
 use Comely\Knit\Compiler\Parser\Variables;
+use Comely\Knit\Exception\CompilerException;
 use Comely\Knit\Exception\ModifierException;
 use Comely\Knit\Exception\ParseException;
 use Comely\Knit\Knit;
@@ -45,6 +47,7 @@ class Parser
     private $token;
 
     use ParseCount;
+    use ParseForeach;
     use ParseIf;
     use ParseImport;
     use ParsePrint;
@@ -86,59 +89,67 @@ class Parser
     private function line(string $line): ?string
     {
         $this->line++;
-        $parsed = preg_replace_callback(
+        return preg_replace_callback(
             '/\{([^\s].+)\}/U',
-            function ($match) {
-                $this->token = $match[1] ?? null; // Without delimiters
-                if ($this->token) {
-                    $this->token = preg_replace('/\s+/', ' ', $this->token);  // Remove multiple spacers
-
-                    // Literal mode?
-                    if (!$this->literal) {
-                        if (preg_match('/^\$.*$/i', $this->token)) {
-                            // Match anything starting with $ sign
-                            return $this->parsePrint();
-                        } elseif (preg_match('/^if\s.+$/i', $this->token)) {
-                            return $this->parseIf(false);
-                        } elseif (preg_match('/^elseif\s.+$/i', $this->token)) {
-                            return $this->parseIf(true);
-                        } elseif (strtolower($this->token) === "else") {
-                            return $this->parseIfElse();
-                        } elseif (strtolower($this->token) === "/if") {
-                            return $this->parseIfClose();
-                        } elseif (preg_match('/^foreach\s\$[a-z\_]+[a-z0-9\_\.]*\sas\s\$[a-z]+[a-z0-9\_]*$/i', $this->token)) {
-                            //return $this->parseForeach();
-                        } elseif (preg_match('/^foreach\s\$[a-z\_]+[a-z0-9\_\.]*\sas\s\$[a-z]+[a-z0-9\_]*\s\=\>\s\$[a-z]+[a-z0-9\_]*$/i', $this->token)) {
-                            //return $this->parseForeachPaired();
-                        } elseif (strtolower($this->token) === "foreachelse") {
-                            //return $this->parseForeachElse();
-                        } elseif (strtolower($this->token) === "/foreach") {
-                            //return $this->parseForeachClose();
-                        } elseif (preg_match('/^count\s\$[a-z\_]+[a-z0-9\_]*\s[1-9][0-9]*\sto\s[1-9][0-9]*$/i', $this->token)) {
-                            return $this->parseCount();
-                        } elseif (strtolower($this->token) === "/count") {
-                            return $this->parseCountClose();
-                        } elseif (preg_match('/^knit\s?(\'|\")[a-z0-9-_.\/]+(\'|\")$/i', $this->token)) {
-                            return $this->parseImport();
-                        } elseif (strtolower($this->token) === "literal") {
-                            $this->literal = true;
-                            return "";
-                        } else {
-                            // Syntax error, Throw exception
-                            throw $this->exception('Incomplete or bad syntax');
-                        }
-                    } else {
-                        if (strtolower($this->token) === "/literal") {
-                            $this->literal = false;
-                            return;
-                        }
-                    }
-                }
+            function ($matches) {
+                $this->tokens($matches);
             },
             $line
         );
+    }
 
-        return $parsed;
+    /**
+     * @param array $matches
+     * @return string
+     * @throws CompilerException
+     * @throws ParseException
+     */
+    private function tokens(array $matches): string
+    {
+        $this->token = $matches[1] ?? null; // Without delimiters
+        if ($this->token) {
+            $this->token = preg_replace('/\s+/', ' ', $this->token);  // Remove multiple spacers
+            // Literal mode?
+            if (!$this->literal) {
+                if (preg_match('/^\$.*$/i', $this->token)) {
+                    // Match anything starting with $ sign
+                    return $this->parsePrint();
+                } elseif (preg_match('/^if\s.+$/i', $this->token)) {
+                    return $this->parseIf(false);
+                } elseif (preg_match('/^elseif\s.+$/i', $this->token)) {
+                    return $this->parseIf(true);
+                } elseif (strtolower($this->token) === "else") {
+                    return $this->parseIfElse();
+                } elseif (strtolower($this->token) === "/if") {
+                    return $this->parseIfClose();
+                } elseif (preg_match('/^foreach\s\$[a-z\_]+[a-z0-9\_\.]*\sas\s\$[a-z]+[a-z0-9\_]*$/i', $this->token)) {
+                    return $this->parseForeach();
+                } elseif (preg_match('/^foreach\s\$[a-z\_]+[a-z0-9\_\.]*\sas\s\$[a-z]+[a-z0-9\_]*\s\=\>\s\$[a-z]+[a-z0-9\_]*$/i', $this->token)) {
+                    return $this->parseForeachPaired();
+                } elseif (strtolower($this->token) === "foreachelse") {
+                    return $this->parseForeachElse();
+                } elseif (strtolower($this->token) === "/foreach") {
+                    return $this->parseForeachClose();
+                } elseif (preg_match('/^count\s\$[a-z\_]+[a-z0-9\_]*\s[1-9][0-9]*\sto\s[1-9][0-9]*$/i', $this->token)) {
+                    return $this->parseCount();
+                } elseif (strtolower($this->token) === "/count") {
+                    return $this->parseCountClose();
+                } elseif (preg_match('/^knit\s?(\'|\")[a-z0-9-_.\/]+(\'|\")$/i', $this->token)) {
+                    return $this->parseImport();
+                } elseif (strtolower($this->token) === "literal") {
+                    $this->literal = true;
+                    return "";
+                } else {
+                    // Syntax error, Throw exception
+                    throw $this->exception('Incomplete or bad syntax');
+                }
+            } else {
+                if (strtolower($this->token) === "/literal") {
+                    $this->literal = false;
+                    return "";
+                }
+            }
+        }
     }
 
     /**
