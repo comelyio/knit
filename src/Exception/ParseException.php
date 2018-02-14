@@ -29,9 +29,9 @@ class ParseException extends CompilerException
      * ParseException constructor.
      * @param string $message
      * @param int $line
-     * @param string|null $token
+     * @param string $token
      */
-    public function __construct(string $message = "", int $line = 0, ?string $token = null)
+    public function __construct(string $message = "", int $line, string $token)
     {
         $this->lineNum = $line;
         if ($token) {
