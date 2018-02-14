@@ -118,14 +118,10 @@ class Parser
                             return $this->parseCount();
                         } elseif (strtolower($this->token) === "/count") {
                             return $this->parseCountClose();
-                        } elseif (preg_match('/^include\sknit=(\'|\")[a-z0-9-_.\/]+(\'|\")$/i', $this->token)) {
-                            //return $this->parseInclude();
-                        } elseif (preg_match('/^knit\sfile=(\'|\")[a-z0-9-_.\/]+(\'|\")$/i', $this->token)) {
-                            //return $this->parseInclude();
                         } elseif (preg_match('/^knit\s?(\'|\")[a-z0-9-_.\/]+(\'|\")$/i', $this->token)) {
-                            //return $this->parseQuickKnit();
+                            return $this->parseImport();
                         } elseif (strtolower($this->token) === "literal") {
-                            //$this->literalMode   =   true;
+                            $this->literal = true;
                             return "";
                         } else {
                             // Syntax error, Throw exception
