@@ -16,12 +16,12 @@ namespace Comely\Knit\Compiler;
 
 use Comely\Knit\Compiler\Parser\ParseCount;
 use Comely\Knit\Compiler\Parser\ParseIf;
+use Comely\Knit\Compiler\Parser\ParseImport;
 use Comely\Knit\Compiler\Parser\ParsePrint;
 use Comely\Knit\Compiler\Parser\Variables;
 use Comely\Knit\Exception\ModifierException;
 use Comely\Knit\Exception\ParseException;
 use Comely\Knit\Knit;
-use Comely\Knit\Modifiers;
 
 /**
  * Class Parser
@@ -29,6 +29,8 @@ use Comely\Knit\Modifiers;
  */
 class Parser
 {
+    /** @var Knit */
+    private $knit;
     /** @var string */
     private $source;
     /** @var array */
@@ -41,26 +43,26 @@ class Parser
     private $line;
     /** @var null|string */
     private $token;
-    /** @var Modifiers */
-    private $modifiers;
 
     use ParseCount;
     use ParseIf;
+    use ParseImport;
     use ParsePrint;
 
     /**
      * Parser constructor.
      * @param Knit $knit
      * @param string $source
+     * @param Variables|null $reserved
      */
-    public function __construct(Knit $knit, string $source)
+    public function __construct(Knit $knit, string $source, ?Variables $reserved = null)
     {
+        $this->knit = $knit;
         $this->source = $source;
         $this->clauses = ["count" => [], "foreach" => [], "if" => 0];
         $this->line = 0;
         $this->literal = false;
-        $this->reserved = new Variables();
-        $this->modifiers = $knit->modifiers();
+        $this->reserved = $reserved ?? new Variables();
     }
 
     /**
@@ -297,7 +299,7 @@ class Parser
                     unset($args);
 
                     try {
-                        $modifier = $this->modifiers->get($modifierName);
+                        $modifier = $this->knit->modifiers()->get($modifierName);
                         if (!$modifier instanceof \Closure) {
                             throw $this->exception(
                                 sprintf('Modifier "%s" not found, no such modifier was registered', $modifierName)
