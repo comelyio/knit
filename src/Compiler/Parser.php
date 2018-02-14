@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Comely\Knit\Compiler;
 
+use Comely\Knit\Compiler\Parser\ParseCount;
 use Comely\Knit\Compiler\Parser\ParseIf;
 use Comely\Knit\Compiler\Parser\ParsePrint;
 use Comely\Knit\Compiler\Parser\Variables;
@@ -43,8 +44,9 @@ class Parser
     /** @var Modifiers */
     private $modifiers;
 
-    use ParsePrint;
+    use ParseCount;
     use ParseIf;
+    use ParsePrint;
 
     /**
      * Parser constructor.
@@ -111,9 +113,9 @@ class Parser
                         } elseif (strtolower($this->token) === "/foreach") {
                             //return $this->parseForeachClose();
                         } elseif (preg_match('/^count\s\$[a-z\_]+[a-z0-9\_]*\s[1-9][0-9]*\sto\s[1-9][0-9]*$/i', $this->token)) {
-                            //return $this->parseCount();
+                            return $this->parseCount();
                         } elseif (strtolower($this->token) === "/count") {
-                            //return $this->parseCountClose();
+                            return $this->parseCountClose();
                         } elseif (preg_match('/^include\sknit=(\'|\")[a-z0-9-_.\/]+(\'|\")$/i', $this->token)) {
                             //return $this->parseInclude();
                         } elseif (preg_match('/^knit\sfile=(\'|\")[a-z0-9-_.\/]+(\'|\")$/i', $this->token)) {
@@ -319,6 +321,23 @@ class Parser
 
 
         return $var;
+    }
+
+    /**
+     * @param string $var
+     * @throws ParseException
+     */
+    private function reserveVariable(string $var): void
+    {
+        $this->reserved->add($var);
+    }
+
+    /**
+     * @param string $var
+     */
+    private function releaseVariable(string $var): void
+    {
+        $this->reserved->delete($var);
     }
 
     /**
