@@ -53,6 +53,7 @@ class Modifiers
         $this->register("ucwords");
         $this->register("basename");
         $this->register("addslashes");
+        $this->register("strlen");
 
         // Round
         $this->register("round", function (string $var, array $args) {
@@ -97,9 +98,10 @@ class Modifiers
         }
 
         if (!$closure) {
-            $closure = function (string $var) use ($name) {
+            $this->register($name, function (string $var) use ($name) {
                 return sprintf('%s(%s)', $name, $var);
-            };
+            });
+            return;
         }
 
         $this->modifiers[$name] = $closure;
