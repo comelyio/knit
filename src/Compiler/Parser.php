@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Comely\Knit\Compiler;
 
+use Comely\Knit\Compiler\Parser\ParsePrint;
 use Comely\Knit\Compiler\Parser\Variables;
 use Comely\Knit\Exception\ModifierException;
 use Comely\Knit\Exception\ParseException;
@@ -40,6 +41,8 @@ class Parser
     private $token;
     /** @var Modifiers */
     private $modifiers;
+
+    use ParsePrint;
 
     /**
      * Parser constructor.
@@ -78,17 +81,17 @@ class Parser
     {
         $this->line++;
         $parsed = preg_replace_callback(
-            '/\{([^\s]).+\}/U',
+            '/\{([^\s].+)\}/U',
             function ($match) {
-                $match = $match[0] ?? null; // With delimiters {}
                 $this->token = $match[1] ?? null; // Without delimiters
                 if ($this->token) {
-                    $token = preg_replace('/\s+/', ' ', $this->token);  // Remove multiple spacers
+                    $this->token = preg_replace('/\s+/', ' ', $this->token);  // Remove multiple spacers
 
                     // Literal mode?
                     if (!$this->literal) {
-                        if (preg_match('/^\$[a-z\_][a-z0-9\_\.\|\:\-\s\'\$\%]+$/i', $this->token)) {
-                            //return $this->parsePrint();
+                        if (preg_match('/^\$.*$/i', $this->token)) {
+                            // Match anything starting with $ sign
+                            return $this->parsePrint();
                         } elseif (preg_match('/^if\s.+$/i', $this->token)) {
                             //return $this->parseIf(false);
                         } elseif (preg_match('/^elseif\s.+$/i', $this->token)) {
@@ -123,7 +126,7 @@ class Parser
                             throw $this->exception('Incomplete or bad syntax');
                         }
                     } else {
-                        if (strtolower($token) === "/literal") {
+                        if (strtolower($this->token) === "/literal") {
                             $this->literal = false;
                             return;
                         }
@@ -146,6 +149,7 @@ class Parser
         // Split variable and modifiers
         $modifiers = explode("|", trim($var));
         $var = $modifiers[0];
+        $varName = $var;
         unset($modifiers[0]);
 
         /*
@@ -208,7 +212,7 @@ class Parser
 
         // Check if it is not a reserved variable
         if (!$this->reserved->has($var)) {
-            $var = sprintf('$this->data["%s"]', strtolower(substr($var, 1)));
+            $var = sprintf("\$this->data['%s']", strtolower(substr($var, 1)));
         }
 
         // Assemble properties array style
@@ -223,87 +227,94 @@ class Parser
         }
 
         // Modifiers
-        foreach ($modifiers as $modifier) {
-            if ($modifier) {
-                /*
-                 * ---
-                 * Validate Modifier
-                 * ---
-                 * // Variables enclosed in {} may be parsed as arguments
-                 * $var = '\:\{\$.+\}';
-                 * // Integers or floats may be parsed as arguments
-                 * $num = '\:\-?[0-9](\.[0-9]+)?';
-                 * // Strings enclosed in quotes (' or ") having only a-z, 0-9, space and only .-_ special chars
-                 * // Strings NOT enclosed in quotes MUST NOT be accepted
-                 * $str = '\:(\"|\')[a-z0-9\s\.\_\-]+(\"|\')';
-                 * // Modifier name must match a-z, 0-9 and may have a underscore
-                 * $pattern = '/^[a-z0-9\_]+((' . $var . ')|(' . $num . ')|(' . $str . '))*$/i';
-                 */
-                $pattern = '/^[a-z0-9\_]+((\:\{\$.+\})|(\:\-?[0-9](\.[0-9]+)?)|(\:(\"|\')[a-z0-9\s\.\_\-]+(\"|\')))*$/i';
-                if (!preg_match($pattern, $modifier)) {
-                    throw $this->exception(
-                        sprintf('Incomplete or bad variable modifier syntax for "%s"', $var)
-                    );
-                }
+        $modifiers = implode("|", $modifiers);
+        if ($modifiers) {
+            /*
+             * ---
+             * Validate Modifiers
+             * ---
+             * // Variables enclosed in [] may be parsed as arguments
+             * $var = '\:\[\$.+\]';
+             * // Integers or floats may be parsed as arguments
+             * $num = '\:\-?[0-9]+(\.[0-9]+)?';
+             * // Strings enclosed in quotes (' or ") having only a-z, 0-9, space and only .-_ special chars
+             * // Strings NOT enclosed in quotes MUST NOT be accepted
+             * $str = '\:(\"|\')[a-z0-9\s\.\_\-]+(\"|\')';
+             * // Modifier name must match a-z, 0-9 and may have a underscore
+             * $modifier = '[a-z0-9\_]+((' . $var . ')|(' . $num . ')|(' . $str . '))*\|?';
+             * $pattern = '/^(' . $modifier . ')*$/';
+             */
+            $pattern = '/^([a-z0-9\_]+((\:\[\$.+\])|(\:\-?[0-9]+(\.[0-9]+)?)|(\:(\"|\')[a-z0-9\s\.\_\-]+(\"|\')))*\|?)*$/i';
+            if (!preg_match($pattern, $modifiers)) {
+                throw $this->exception(
+                    sprintf('Incomplete or bad variable modifiers syntax for "%s"', $varName)
+                );
+            }
 
-                // Check if has variables enclosed as arguments
-                if (strpos($modifier, ':{$')) {
-                    $modifier = preg_replace_callback(
-                        '/\{(\$.+)\}/U',
-                        function ($argVar) {
-                            $argVar = $argVar[1] ?? null;
-                            if (is_string($argVar)) {
-                                return $this->variable($argVar);
-                            }
-                        },
-                        $modifier
-                    );
-                }
+            // Check if has variables enclosed as arguments
+            if (strpos($modifiers, ':[$')) {
+                $modifiers = preg_replace_callback(
+                    '/\[(\$.+)\]/U',
+                    function ($modifierVar) {
+                        $modifierVar = $modifierVar[1] ?? null;
+                        if (is_string($modifierVar)) {
+                            return $this->variable($modifierVar);
+                        }
+                    },
+                    $modifiers
+                );
+            }
 
-                // Split arguments
-                $args = explode(":", $modifier);
-                $modifierName = strtolower($args[0]);
-                unset($args[0]);
+            $modifiers = explode("|", $modifiers);
+            foreach ($modifiers as $modifier) {
+                if ($modifier) {
+                    // Split arguments
+                    $args = explode(":", $modifier);
+                    $modifierName = strtolower($args[0]);
+                    unset($args[0]);
+                    // Process arguments
+                    $arguments = [];
+                    foreach ($args as $arg) {
+                        if ($arg === "null") {
+                            $arguments[] = null;
+                        } elseif (preg_match('/^\-?[0-9]+(\.[0-9]+)?$/', $arg)) {
+                            $arguments[] = strpos($arg, ".") ? floatval($arg) : intval($arg);
+                        } elseif ($arg === "true") {
+                            $arguments[] = true;
+                        } elseif ($arg === "false") {
+                            $arguments[] = false;
+                        } elseif (preg_match('/^(\'|\")[a-z0-9\s\.\_\-]+(\'|\")$/i', $arg)) {
+                            $arguments[] = "'" . substr($arg, 1, -1) . "'";
+                        }
 
-                // Process arguments
-                $arguments = [];
-                foreach ($args as $arg) {
-                    if ($arg === "null") {
-                        $arguments[] = null;
-                    } elseif (preg_match('/^\-?[0-9](\.[0-9]+)?$/', $arg)) {
-                        $arguments[] = strpos($arg, ".") ? floatval($arg) : intval($arg);
-                    } elseif ($arg === "true") {
-                        $arguments[] = true;
-                    } elseif ($arg === "false") {
-                        $arguments[] = false;
-                    } elseif (preg_match('/^(\'|\")[a-z0-9\s\.\_\-]+(\'|\")$/i', $arg)) {
-                        $arguments[] = substr($arg, 1, -1);
-                    }
-                }
-
-                unset($args);
-
-                try {
-                    $modifier = $this->modifiers->get($modifierName);
-                    if (!$modifier instanceof \Closure) {
-                        throw $this->exception(
-                            sprintf('Modifier "%s" not found, no such modifier was registered', $modifierName)
-                        );
+                        $arguments[] = $arg; // append as-is
                     }
 
-                    /**
-                     * Call modifier function
-                     * ---
-                     * @param string $var
-                     * @param array $arguments
-                     */
-                    call_user_func_array($modifier, [$var, $arguments]);
-                } catch (ModifierException $e) {
-                    // Append line and near part in modifier's exception
-                    throw $this->exception($e->getMessage());
+                    unset($args);
+
+                    try {
+                        $modifier = $this->modifiers->get($modifierName);
+                        if (!$modifier instanceof \Closure) {
+                            throw $this->exception(
+                                sprintf('Modifier "%s" not found, no such modifier was registered', $modifierName)
+                            );
+                        }
+
+                        /**
+                         * Call modifier function
+                         * ---
+                         * @param string $var
+                         * @param array $arguments
+                         */
+                        $var = call_user_func_array($modifier, [$var, $arguments]);
+                    } catch (ModifierException $e) {
+                        // Append line and near part in modifier's exception
+                        throw $this->exception($e->getMessage());
+                    }
                 }
             }
         }
+
 
         return $var;
     }
