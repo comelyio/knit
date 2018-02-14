@@ -331,7 +331,11 @@ class Parser
      */
     private function reserveVariable(string $var): void
     {
-        $this->reserved->add($var);
+        try {
+            $this->reserved->add($var);
+        } catch (\Exception $e) {
+            throw $this->exception($e->getMessage());
+        }
     }
 
     /**
