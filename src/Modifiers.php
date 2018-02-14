@@ -32,6 +32,68 @@ class Modifiers
     public function __construct()
     {
         $this->modifiers = [];
+        $this->registerCoreModifiers();
+    }
+
+    /**
+     * @throws KnitException
+     */
+    public function registerCoreModifiers(): void
+    {
+        $this->register("isset");
+        $this->register("var_dump");
+        $this->register("count");
+
+        // Date
+        $this->register("date", function (string $var, array $args) {
+            $format = $args[0] ?? null;
+            if (!is_string($format)) {
+                throw ModifierException::TypeError($var, "date", 1, "string", gettype($format));
+            }
+
+            return sprintf('date(%s, %d)', $format, $var);
+        });
+    }
+
+    /**
+     * @throws KnitException
+     */
+    public function registerTranslationModifiers(): void
+    {
+        // Translate
+        $this->register("translate", function (string $var, array $args) {
+            // Translation by $knit var
+            if ($var === '$knit') {
+                $translatable = $args[0] ?? null;
+                if (!is_string($translatable)) {
+                    throw ModifierException::TypeError($var, "translate", 1, "string", gettype($translatable));
+                }
+
+                $dynamicKey = $args[1] ?? null;
+                if (!$dynamicKey) {
+                    return sprintf("__('%s')", $translatable);
+                }
+
+                if (!is_string($dynamicKey)) {
+                    throw ModifierException::TypeError($var, "translate", 2, "string", gettype($dynamicKey));
+                }
+
+                return sprintf("__(sprintf('%s', %s)", $translatable, $dynamicKey);
+            }
+
+            // Direct variable translation
+            $dynamicKey = $args[0] ?? null;
+            if (!$dynamicKey) {
+                return sprintf("__(%s)", $var);
+            }
+
+            if (!is_string($dynamicKey)) {
+                throw ModifierException::TypeError($var, "translate", 1, "string", gettype($dynamicKey));
+            }
+
+            $dynamicKey = strpos($dynamicKey, "(") ? $dynamicKey : "'" . $dynamicKey . "'";
+            return sprintf("__(sprintf(%s, %s)", $var, $dynamicKey);
+        });
     }
 
     /**
