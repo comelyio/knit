@@ -14,8 +14,7 @@ declare(strict_types=1);
 
 namespace Comely\Knit;
 
-use Comely\Knit\Exception\KnitException;
-use Comely\Knit\Exception\TemplateException;
+use Comely\Knit\Exception\CachingException;
 
 /**
  * Class Knit
@@ -46,7 +45,7 @@ class Knit
     public function caching(): Caching
     {
         if (!$this->directories->_caching) {
-            throw new KnitException('Caching directory not defined');
+            throw new CachingException('Caching directory not defined');
         }
 
         return $this->caching;
