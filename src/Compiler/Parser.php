@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Comely\Knit\Compiler;
 
 use Comely\Knit\Compiler\Parser\Variables;
+use Comely\Knit\Exception\ModifierException;
 use Comely\Knit\Exception\ParseException;
 use Comely\Knit\Knit;
 use Comely\Knit\Modifiers;
@@ -282,35 +283,25 @@ class Parser
 
                 unset($args);
 
-                // Apply core or a custom modifier
-                switch ($modifierName) {
-                    case "isset":
-                    case "var_dump":
-                    case "count":
-                        break;
-                    case "translate":
-                        // Todo: translate function
-                        break;
-                    case "data":
-                        // Todo: date modifier
-                        break;
-                    default:
-                        $modifier = $this->modifiers->get($modifierName);
-                        if (!$modifier instanceof \Closure) {
-                            throw $this->exception(
-                                sprintf('Modifier "%s" not found, no such modifier was registered', $modifierName)
-                            );
-                        }
+                try {
+                    $modifier = $this->modifiers->get($modifierName);
+                    if (!$modifier instanceof \Closure) {
+                        throw $this->exception(
+                            sprintf('Modifier "%s" not found, no such modifier was registered', $modifierName)
+                        );
+                    }
 
-                        /**
-                         * Call modifier function
-                         * ---
-                         * @param string $var
-                         * @param array $arguments
-                         */
-                        call_user_func_array($modifier, [$var, $arguments]);
+                    /**
+                     * Call modifier function
+                     * ---
+                     * @param string $var
+                     * @param array $arguments
+                     */
+                    call_user_func_array($modifier, [$var, $arguments]);
+                } catch (ModifierException $e) {
+                    // Append line and near part in modifier's exception
+                    throw $this->exception($e->getMessage());
                 }
-
             }
         }
 
