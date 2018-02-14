@@ -20,6 +20,9 @@ use Comely\Knit\Exception\CachingException;
 /**
  * Class Caching
  * @package Comely\Knit
+ * @property null|string $_sessionId
+ * @property int $_type
+ * @property int $_ttl
  */
 class Caching
 {
@@ -41,6 +44,35 @@ class Caching
     {
         $this->disable();
         $this->ttl = 0;
+    }
+
+    /**
+     * @param $prop
+     * @return int|null|string
+     * @throws CachingException
+     */
+    public function __get($prop)
+    {
+        switch ($prop) {
+            case "_sessionId":
+                return $this->sessionId;
+            case "_type":
+                return $this->type;
+            case "_ttl":
+                return $this->ttl;
+        }
+
+        throw new CachingException('Cannot read inaccessible property');
+    }
+
+    /**
+     * @param $prop
+     * @param $value
+     * @throws CachingException
+     */
+    public function __set($prop, $value)
+    {
+        throw new CachingException('Cannot write inaccessible property');
     }
 
     /**
