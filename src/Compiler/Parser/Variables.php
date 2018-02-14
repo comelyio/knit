@@ -14,8 +14,6 @@ declare(strict_types=1);
 
 namespace Comely\Knit\Compiler\Parser;
 
-use Comely\Knit\Exception\ParseException;
-
 /**
  * Class Variables
  * @package Comely\Knit\Compiler\Parser
@@ -39,7 +37,7 @@ class Variables
     public function add(string $var): void
     {
         if (in_array(strtolower($var), ["this", "knit"])) {
-            throw new ParseException(sprintf('Variable "%s" cannot be reserved', $var));
+            throw new \DomainException(sprintf('Variable "%s" cannot be reserved', $var));
         }
 
         $this->vars[] = $var;
