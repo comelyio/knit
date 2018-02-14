@@ -21,7 +21,7 @@ namespace Comely\Knit\Exception;
 class ParseException extends CompilerException
 {
     /** @var int */
-    private $line;
+    private $lineNum;
     /** @var null|string */
     private $token;
 
@@ -33,7 +33,7 @@ class ParseException extends CompilerException
      */
     public function __construct(string $message = "", int $line = 0, ?string $token = null)
     {
-        $this->line = $line;
+        $this->lineNum = $line;
         if ($token) {
             $this->token = substr($token, 0, 16) . "...";
         }
@@ -46,7 +46,7 @@ class ParseException extends CompilerException
      */
     public function line(): int
     {
-        return $this->line;
+        return $this->lineNum;
     }
 
     /**
