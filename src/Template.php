@@ -14,11 +14,12 @@ declare(strict_types=1);
 
 namespace Comely\Knit;
 
-use Comely\IO\FileSystem\Disk\Directory;
 use Comely\IO\FileSystem\Disk\File;
 use Comely\IO\FileSystem\Exception\DiskException;
+use Comely\Knit\Exception\CachingException;
 use Comely\Knit\Exception\TemplateException;
 use Comely\Knit\Template\Data;
+use Comely\Knit\Template\Metadata;
 
 /**
  * Class Template
@@ -30,6 +31,12 @@ class Template
     private $knit;
     /** @var Data */
     private $data;
+    /** @var Metadata */
+    private $metadata;
+    /** @var File */
+    private $file;
+    /** @var null|Caching */
+    private $caching;
 
     /**
      * Template constructor.
@@ -54,7 +61,24 @@ class Template
         }
 
         $this->knit = $knit;
+        $this->file = $file;
         $this->data = new Data();
+        $this->metadata = new Metadata();
+    }
+
+    /**
+     * @return Caching
+     * @throws CachingException
+     */
+    public function caching(): Caching
+    {
+        if ($this->caching) {
+            return $this->caching;
+        }
+
+        // Clone Knit's caching instance
+        $this->caching = clone $this->knit->caching();
+        return $this->caching;
     }
 
     /**
@@ -67,5 +91,23 @@ class Template
     {
         $this->data->push($key, $value);
         return $this;
+    }
+
+    public function meta(string $key, $value): self
+    {
+        $this->metadata;
+        return $this;
+    }
+
+    public function compile(): string
+    {
+        $compiler = new Compiler($this->knit, $this->file, $this->data);
+    }
+
+    public function knit(): string
+    {
+        // Look in cache
+
+        // Compile a fresh copy
     }
 }
