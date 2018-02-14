@@ -20,4 +20,12 @@ namespace Comely\Knit\Compiler;
  */
 class CompiledTemplate
 {
+    /** @var string */
+    public $fileName;
+    /** @var string */
+    public $templatePath;
+    /** @var int */
+    public $timeStamp;
+    /** @var float */
+    public $timer;
 }
