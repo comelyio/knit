@@ -282,7 +282,7 @@ class Parser
 
                 unset($args);
 
-                // Apply modifier
+                // Apply core or a custom modifier
                 switch ($modifierName) {
                     case "isset":
                     case "var_dump":
