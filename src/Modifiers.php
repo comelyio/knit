@@ -71,14 +71,14 @@ class Modifiers
 
                 $dynamicKey = $args[1] ?? null;
                 if (!$dynamicKey) {
-                    return sprintf("__('%s')", $translatable);
+                    return sprintf("__(%s)", $translatable);
                 }
 
                 if (!is_string($dynamicKey)) {
                     throw ModifierException::TypeError($var, "translate", 2, "string", gettype($dynamicKey));
                 }
 
-                return sprintf("__(sprintf('%s', %s)", $translatable, $dynamicKey);
+                return sprintf("__(sprintf(%s, %s)", $translatable, $dynamicKey);
             }
 
             // Direct variable translation
@@ -91,7 +91,6 @@ class Modifiers
                 throw ModifierException::TypeError($var, "translate", 1, "string", gettype($dynamicKey));
             }
 
-            $dynamicKey = strpos($dynamicKey, "(") ? $dynamicKey : "'" . $dynamicKey . "'";
             return sprintf("__(sprintf(%s, %s)", $var, $dynamicKey);
         });
     }
