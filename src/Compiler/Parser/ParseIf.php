@@ -58,7 +58,7 @@ trait ParseIf
         $statement .= implode(sprintf(' %s ', str_repeat($divider, 2)), $pieces);
 
         if (!$isElseIf) {
-            $this->clauses["ifs"]++;
+            $this->clauses["if"]++;
         }
 
         return $statement . ') { ?>';
