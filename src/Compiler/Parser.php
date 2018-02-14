@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Comely\Knit\Compiler;
 
+use Comely\Knit\Compiler\Parser\ParseIf;
 use Comely\Knit\Compiler\Parser\ParsePrint;
 use Comely\Knit\Compiler\Parser\Variables;
 use Comely\Knit\Exception\ModifierException;
@@ -43,6 +44,7 @@ class Parser
     private $modifiers;
 
     use ParsePrint;
+    use ParseIf;
 
     /**
      * Parser constructor.
@@ -93,13 +95,13 @@ class Parser
                             // Match anything starting with $ sign
                             return $this->parsePrint();
                         } elseif (preg_match('/^if\s.+$/i', $this->token)) {
-                            //return $this->parseIf(false);
+                            return $this->parseIf(false);
                         } elseif (preg_match('/^elseif\s.+$/i', $this->token)) {
-                            //return $this->parseIf(true);
+                            return $this->parseIf(true);
                         } elseif (strtolower($this->token) === "else") {
-                            //return $this->parseIfElse();
+                            return $this->parseIfElse();
                         } elseif (strtolower($this->token) === "/if") {
-                            //return $this->parseIfClose();
+                            return $this->parseIfClose();
                         } elseif (preg_match('/^foreach\s\$[a-z\_]+[a-z0-9\_\.]*\sas\s\$[a-z]+[a-z0-9\_]*$/i', $this->token)) {
                             //return $this->parseForeach();
                         } elseif (preg_match('/^foreach\s\$[a-z\_]+[a-z0-9\_\.]*\sas\s\$[a-z]+[a-z0-9\_]*\s\=\>\s\$[a-z]+[a-z0-9\_]*$/i', $this->token)) {
