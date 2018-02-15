@@ -89,9 +89,15 @@ class Template
         return $this;
     }
 
-    public function meta(string $key, $value): self
+    /**
+     * @param string $key
+     * @param Metadata\MetaValueInterface $value
+     * @return Template
+     */
+    public function metadata(string $key, Metadata\MetaValueInterface $value): self
     {
-        // Todo: meta data
+        $this->metadata->add($key, $value);
+        return $this;
     }
 
     /**
@@ -241,7 +247,7 @@ class Template
         }
 
         // Metadata
-        // Todo: append meta data from CompiledTemplate instance (i.e. timer & time)
+        $this->metadata("timer", new Metadata\MetaVariable($compiled->timer));
 
         // Delete compiled file
         try {
@@ -268,8 +274,33 @@ class Template
             throw new TemplateException('Failed to read cached or compile fresh knit template');
         }
 
-        // Todo: process metadata
+        // Process metadata
+        foreach ($this->metadata as $key => $value) {
+            $metaValue = null;
+            if ($value instanceof Metadata\MetaVariable) {
+                $metaValue = $value->value();
+            } elseif ($value instanceof Metadata\MetaTemplate) {
+                try {
+                    $metaTemplate = $this->knit->template($value->template());
+                    $metaTemplate->caching()->disable(); // Disable caching
+                    $value->assignData($metaTemplate);
+                    $metaValue = $metaTemplate->knit();
+                } catch (TemplateException $e) {
+                    $metaValue = sprintf(
+                        'An error occurred while parsing meta template "%s". [%s] %s',
+                        $value->template(),
+                        get_class($e),
+                        $e->getMessage()
+                    );
+                }
+            }
 
+            if ($metaValue) {
+                $template = str_replace('%[%' . $key . '%]%', $metaValue, $template);
+            }
+        }
+
+        // Return processed template
         return $template;
     }
 }
