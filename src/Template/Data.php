@@ -20,7 +20,7 @@ use Comely\Knit\Exception\TemplateException;
  * Class Data
  * @package Comely\Knit\Template
  */
-class Data implements \Iterator
+class Data
 {
     private const RESERVED = ["knit"];
 
@@ -37,46 +37,6 @@ class Data implements \Iterator
             "now" => time(),
             "get" => $_GET
         ];
-    }
-
-    /**
-     * @return void
-     */
-    public function rewind(): void
-    {
-        reset($this->data);
-    }
-
-    /**
-     * @return void
-     */
-    public function next(): void
-    {
-        next($this->data);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function current()
-    {
-        return current($this->data);
-    }
-
-    /**
-     * @return string
-     */
-    public function key(): string
-    {
-        return key($this->data);
-    }
-
-    /**
-     * @return bool
-     */
-    public function valid(): bool
-    {
-        return is_null(key($this->data)) ? false : true;
     }
 
     /**
@@ -120,5 +80,13 @@ class Data implements \Iterator
                 );
 
         }
+    }
+
+    /**
+     * @return array
+     */
+    public function array(): array
+    {
+        return $this->data;
     }
 }
