@@ -12,12 +12,16 @@
 
 declare(strict_types=1);
 
-namespace Comely\Knit\Template;
+namespace Comely\Knit;
 
 /**
- * Class CachedTemplate
- * @package Comely\Knit\Template
+ * Interface Constants
+ * @package Comely\Knit
  */
-class CachedTemplate
+interface Constants
 {
+    /** string Version (Major.Minor.Release) */
+    const VERSION = "2.0.0";
+    /** int Version (Major * 10000 + Minor * 100 + Release) */
+    const VERSION_ID = 20000;
 }

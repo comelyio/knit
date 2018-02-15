@@ -21,9 +21,9 @@ namespace Comely\Knit\Compiler;
 class CompiledTemplate
 {
     /** @var string */
-    public $fileName;
+    public $compiledFile;
     /** @var string */
-    public $templatePath;
+    public $templateName;
     /** @var int */
     public $timeStamp;
     /** @var float */

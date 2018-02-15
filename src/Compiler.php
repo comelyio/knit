@@ -92,11 +92,10 @@ class Compiler implements Constants
     }
 
     /**
-     * @param null|string $sessionId (optional session identifier, has nothing to do with caching)
      * @return CompiledTemplate
      * @throws CompilerException
      */
-    public function compile(?string $sessionId = null): CompiledTemplate
+    public function compile(): CompiledTemplate
     {
         $compilerDirectory = $this->knit->directories()->_compiler;
         if (!$compilerDirectory) {
@@ -109,7 +108,7 @@ class Compiler implements Constants
 
         // new CompiledTemplate instance
         $compiledTemplate = new CompiledTemplate();
-        $compiledTemplate->templatePath = $this->fileName;
+        $compiledTemplate->templateName = $this->fileName;
         $compiledTemplate->timeStamp = time();
         $compiledTemplate->timer = microtime(true) - $timer;
 
@@ -121,16 +120,15 @@ class Compiler implements Constants
         $compile .= $this->parse(); // Parse
 
         // Compile file name
-        $compiledTemplate->fileName = sprintf(
+        $compiledTemplate->compiledFile = sprintf(
             'knit_%s_%s%d.php',
             md5($this->fileName),
-            $sessionId ? $sessionId . "_" : $sessionId,
             mt_rand(0, 1000)
         );
 
         // Write
         try {
-            $wrote = $compilerDirectory->write($compiledTemplate->fileName, $compile, false, true);
+            $wrote = $compilerDirectory->write($compiledTemplate->compiledFile, $compile, false, true);
             if (!$wrote) {
                 throw new CompilerException('An an unexpected error occurred while writing compiled knit file');
             }

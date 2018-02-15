@@ -20,7 +20,7 @@ use Comely\Knit\Exception\CachingException;
  * Class Knit
  * @package Comely\Knit
  */
-class Knit
+class Knit implements Constants
 {
     /** @var Caching */
     private $caching;

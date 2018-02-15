@@ -14,12 +14,14 @@ declare(strict_types=1);
 
 namespace Comely\Knit;
 
-use Comely\IO\FileSystem\Disk\File;
 use Comely\IO\FileSystem\Exception\DiskException;
 use Comely\Knit\Exception\CachingException;
+use Comely\Knit\Exception\CompilerException;
+use Comely\Knit\Exception\SandboxException;
 use Comely\Knit\Exception\TemplateException;
 use Comely\Knit\Template\Data;
 use Comely\Knit\Template\Metadata;
+use Comely\Knit\Template\Sandbox;
 
 /**
  * Class Template
@@ -33,10 +35,10 @@ class Template
     private $data;
     /** @var Metadata */
     private $metadata;
-    /** @var File */
-    private $file;
     /** @var null|Caching */
     private $caching;
+    /** @var string */
+    private $fileName;
 
     /**
      * Template constructor.
@@ -46,24 +48,14 @@ class Template
      */
     public function __construct(Knit $knit, string $fileName)
     {
-        $templatesDirectory = $knit->directories()->_templates;
-        if (!$templatesDirectory) {
-            throw new TemplateException('Cannot create Template instance, base templates directory not set');
-        }
-
-        try {
-            $file = $templatesDirectory->file($fileName);
-            if (!$file->permissions()->read) {
-                throw new TemplateException(sprintf('Template file "%s" is not readable', $fileName));
-            }
-        } catch (DiskException $e) {
-            throw new TemplateException(sprintf('Template file "%s" not found', $fileName));
+        if (!preg_match('/^([a-z0-9\_\-\.]+(\/|\\\))*[a-z0-9\_\-\.]+\.knit$/', $fileName)) {
+            throw new TemplateException('Invalid knit template file');
         }
 
         $this->knit = $knit;
-        $this->file = $file;
         $this->data = new Data();
         $this->metadata = new Metadata();
+        $this->fileName = $fileName;
     }
 
     /**
@@ -74,6 +66,10 @@ class Template
     {
         if ($this->caching) {
             return $this->caching;
+        }
+
+        if (!$this->knit->directories()->_caching) {
+            throw new CachingException('Caching directory not defined');
         }
 
         // Clone Knit's caching instance
@@ -95,19 +91,185 @@ class Template
 
     public function meta(string $key, $value): self
     {
-        $this->metadata;
-        return $this;
+        // Todo: meta data
     }
 
-    public function compile(): string
+    /**
+     * @return null|string
+     * @throws CachingException
+     */
+    private function cached(): ?string
     {
-        $compiler = new Compiler($this->knit, $this->file, $this->data);
+        if (!$this->caching) {
+            return null;
+        }
+
+        // Get cached file ID and directory
+        $cacheFileId = md5($this->fileName);
+        $cachedFileName = null;
+        $cachingType = null;
+        $cachingDirectory = $this->knit->directories()->_caching;
+        if (!$cachingDirectory) {
+            throw new CachingException('Caching directory not defined');
+        }
+
+        // Determine cached file name
+        $sessionId = $this->caching->_sessionId;
+        if ($this->caching->_type === Caching::AGGRESSIVE && $sessionId) {
+            $cachingType = Caching::AGGRESSIVE;
+            $cachedFileName = sprintf('knit_%s-%s.knit', $cacheFileId, $sessionId);
+        } elseif ($this->caching->_type === Caching::NORMAL) {
+            $cachingType = Caching::NORMAL;
+            $cachedFileName = sprintf('knit_%s.php', $cacheFileId);
+        }
+
+        if ($cachingType && $cachedFileName) {
+            try {
+                $cachedFile = $cachingDirectory->file($cachedFileName);
+                if (!$cachedFile->permissions()->read) {
+                    throw new CachingException('Cached knit template file is not readable');
+                }
+
+                // Check for expiry
+                if ($this->caching->_ttl) {
+                    $cachedFileTime = $cachedFile->lastModified();
+                    if ((time() - $cachedFileTime) >= $this->caching->_ttl) {
+                        throw new \Exception('Cached template file has expired');
+                    }
+                }
+
+                if ($cachingType === Caching::AGGRESSIVE) {
+                    // Read
+                    try {
+                        $cachedTemplate = $cachedFile->read();
+                    } catch (DiskException $e) {
+                        throw new CachingException('Cached file could not be read');
+                    }
+
+                    $cachedStart = substr($cachedTemplate, 0, 6);
+                    $cachedEnd = substr($cachedTemplate, -6);
+                    if (!$cachedStart !== "~knit:" || $cachedEnd !== ":knit~") {
+                        throw new CachingException('Bad or incomplete cached knit template');
+                    }
+
+                    return substr($cachedTemplate, 6, -6);
+                } elseif ($cachingType === Caching::NORMAL) {
+                    // Run in sandbox
+                    try {
+                        return (new Sandbox($cachedFile, $this->data))
+                            ->run();
+                    } catch (SandboxException $e) {
+                        throw new CachingException($e->getMessage());
+                    }
+                }
+
+            } catch (\Exception $e) {
+                // CachingException messages will be triggered as E_USER_WARNING error
+                // All other exceptions will be ignored
+                if ($e instanceof CachingException) {
+                    trigger_error($e->getMessage(), E_USER_WARNING);
+                }
+
+                // Check if cache file exists
+                if (isset($cachedFile)) {
+                    // Not being used indicates this needs to be deleted
+                    try {
+                        $cachedFile->delete();
+                    } catch (DiskException $e) {
+                        trigger_error('Failed to delete cached template file', E_USER_WARNING);
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
+    /**
+     * @return string
+     * @throws CompilerException
+     * @throws SandboxException
+     */
+    private function compile(): string
+    {
+        // Compile knit template
+        $compiled = (new Compiler($this->knit, $this->fileName))
+            ->compile();
+
+        // Get compiled file
+        try {
+            $compiledFile = $this->knit->directories()->_compiler->file($compiled->compiledFile);
+        } catch (DiskException $e) {
+            throw new CompilerException(
+                sprintf('Failed to located compiled knit template file "%s"', $compiled->compiledFile)
+            );
+        }
+
+        // Run in sandbox and return output
+        $output = (new Sandbox($compiledFile, $this->data))
+            ->run();
+
+        // Caching
+        if ($this->caching) {
+            $cacheFileId = md5($this->fileName);
+            $sessionId = $this->caching->_sessionId;
+            if ($this->caching->_type === Caching::AGGRESSIVE && $sessionId) {
+                $cacheFileName = sprintf('knit_%s-%s.knit', $cacheFileId, $sessionId);
+                $cacheContents = "~knit:" . $output . ":knit~";
+            } elseif ($this->caching->_type === Caching::NORMAL) {
+                $cacheFileName = sprintf('knit_%s.php', $cacheFileId);
+                try {
+                    $cacheContents = $compiledFile->read();
+                } catch (DiskException $e) {
+                    trigger_error('Failed to read compiled knit file for cache', E_USER_WARNING);
+                }
+            }
+
+            // Write cache
+            if (isset($cacheFileName, $cacheContents)) {
+                $cachingDirectory = $this->knit->directories()->_caching;
+                if (!$cachingDirectory) {
+                    trigger_error('Failed to cache knit template, caching directory is not set', E_USER_WARNING);
+                }
+
+                try {
+                    $cachingDirectory->write($cacheFileName, $cacheContents, false, true);
+                } catch (DiskException $e) {
+                    trigger_error('Failed to write knit cache template file', E_USER_WARNING);
+                }
+            }
+        }
+
+        // Metadata
+        // Todo: append meta data from CompiledTemplate instance (i.e. timer & time)
+
+        // Delete compiled file
+        try {
+            $compiledFile->delete();
+        } catch (DiskException $e) {
+            trigger_error('Failed to delete compiled knit template PHP file', E_USER_WARNING);
+        }
+
+        // Return output string
+        return $output;
+    }
+
+    /**
+     * @return string
+     * @throws CachingException
+     * @throws CompilerException
+     * @throws SandboxException
+     * @throws TemplateException
+     */
     public function knit(): string
     {
-        // Look in cache
+        $template = $this->cached() ?? $this->compile() ?? null;
+        if (!$template || !is_string($template)) {
+            throw new TemplateException('Failed to read cached or compile fresh knit template');
+        }
 
-        // Compile a fresh copy
+        // Todo: process metadata
+
+        return $template;
     }
 }
