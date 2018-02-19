@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Comely\Knit\Compiler;
 
+use Comely\IO\FileSystem\Disk\Directory;
 use Comely\Knit\Compiler\Parser\ParseCount;
 use Comely\Knit\Compiler\Parser\ParseForeach;
 use Comely\Knit\Compiler\Parser\ParseIf;
@@ -33,6 +34,8 @@ class Parser
 {
     /** @var Knit */
     private $knit;
+    /** @var Directory */
+    private $directory;
     /** @var string */
     private $source;
     /** @var array */
@@ -57,10 +60,12 @@ class Parser
      * @param Knit $knit
      * @param string $source
      * @param Variables|null $reserved
+     * @param Directory|null $directory
      */
-    public function __construct(Knit $knit, string $source, ?Variables $reserved = null)
+    public function __construct(Knit $knit, string $source, ?Variables $reserved = null, ?Directory $directory = null)
     {
         $this->knit = $knit;
+        $this->directory = $directory ?? $this->knit->directories()->_templates;
         $this->source = $source;
         $this->clauses = ["count" => [], "foreach" => [], "if" => 0];
         $this->line = 0;

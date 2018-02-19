@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Comely\Knit;
 
+use Comely\IO\FileSystem\Disk\Directory;
 use Comely\IO\FileSystem\Exception\DiskException;
 use Comely\Knit\Exception\CachingException;
 use Comely\Knit\Exception\CompilerException;
@@ -37,16 +38,18 @@ class Template
     private $metadata;
     /** @var null|Caching */
     private $caching;
+    /** @var Directory */
+    private $directory;
     /** @var string */
     private $fileName;
 
     /**
      * Template constructor.
      * @param Knit $knit
+     * @param Directory $directory
      * @param string $fileName
-     * @throws TemplateException
      */
-    public function __construct(Knit $knit, string $fileName)
+    public function __construct(Knit $knit, Directory $directory, string $fileName)
     {
         if (!preg_match('/^([a-z0-9\_\-\.]+(\/|\\\))*[a-z0-9\_\-\.]+\.knit$/', $fileName)) {
             throw new TemplateException('Invalid knit template file');
@@ -55,6 +58,7 @@ class Template
         $this->knit = $knit;
         $this->data = new Data();
         $this->metadata = new Metadata();
+        $this->directory = $directory;
         $this->fileName = $fileName;
     }
 
@@ -199,7 +203,7 @@ class Template
     private function compile(): string
     {
         // Compile knit template
-        $compiled = (new Compiler($this->knit, $this->fileName))
+        $compiled = (new Compiler($this->knit, $this->directory, $this->fileName))
             ->compile();
 
         // Get compiled file

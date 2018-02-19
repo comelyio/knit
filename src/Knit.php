@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Comely\Knit;
 
 use Comely\Knit\Exception\CachingException;
+use Comely\Knit\Exception\TemplateException;
 
 /**
  * Class Knit
@@ -70,9 +71,15 @@ class Knit implements Constants
     /**
      * @param string $fileName
      * @return Template
+     * @throws TemplateException
      */
     public function template(string $fileName): Template
     {
-        return new Template($this, $fileName);
+        $templatesDirectory = $this->directories()->_templates;
+        if (!$templatesDirectory) {
+            throw new TemplateException('Knit base templates directory not set');
+        }
+
+        return new Template($this, $templatesDirectory, $fileName);
     }
 }

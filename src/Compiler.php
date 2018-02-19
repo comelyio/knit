@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Comely\Knit;
 
+use Comely\IO\FileSystem\Disk\Directory;
 use Comely\IO\FileSystem\Disk\File;
 use Comely\IO\FileSystem\Exception\DiskException;
 use Comely\Knit\Compiler\CompiledTemplate;
@@ -29,6 +30,8 @@ class Compiler implements Constants
 {
     /** @var Knit */
     private $knit;
+    /** @var Directory */
+    private $directory;
     /** @var File */
     private $file;
     /** @var string */
@@ -39,18 +42,18 @@ class Compiler implements Constants
     /**
      * Compiler constructor.
      * @param Knit $knit
+     * @param Directory $directory
      * @param string $fileName
      * @throws CompilerException
      */
-    public function __construct(Knit $knit, string $fileName)
+    public function __construct(Knit $knit, Directory $directory, string $fileName)
     {
-        $templatesDirectory = $knit->directories()->_templates;
-        if (!$templatesDirectory) {
-            throw new CompilerException('Knit base templates directory not set');
+        if (!$directory->permissions()->read) {
+            throw new CompilerException(sprintf('Template "%s" directory is not readable', $fileName));
         }
 
         try {
-            $file = $templatesDirectory->file($fileName);
+            $file = $directory->file($fileName);
             if (!$file->permissions()->read) {
                 throw new CompilerException(sprintf('Template file "%s" is not readable', $fileName));
             }
@@ -59,6 +62,7 @@ class Compiler implements Constants
         }
 
         $this->knit = $knit;
+        $this->directory = $directory;
         $this->file = $file;
         $this->fileName = $fileName;
         $this->eolChar = PHP_EOL;
