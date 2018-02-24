@@ -275,9 +275,9 @@ class Template
     {
         $timer = microtime(true);
         $template = $this->cached() ?? $this->compile() ?? null;
-        if (!$template || !is_string($template)) {
+        if (!is_string($template)) {
             throw new TemplateException('Failed to read cached or compile fresh knit template');
-        };
+        }
 
         // Process metadata
         foreach ($this->metadata as $key => $value) {
