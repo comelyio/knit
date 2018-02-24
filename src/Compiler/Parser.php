@@ -97,7 +97,7 @@ class Parser
         return preg_replace_callback(
             '/\{([^\s].+)\}/U',
             function ($matches) {
-                $this->tokens($matches);
+                return $this->tokens($matches);
             },
             $line
         );
