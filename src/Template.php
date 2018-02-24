@@ -251,7 +251,7 @@ class Template
         }
 
         // Metadata
-        $this->metadata("timer", new Metadata\MetaVariable($compiled->timer));
+        $this->metadata("timer.compile", new Metadata\MetaVariable($compiled->timer));
 
         // Delete compiled file
         try {
@@ -273,10 +273,14 @@ class Template
      */
     public function knit(): string
     {
+        $timer = microtime(true);
         $template = $this->cached() ?? $this->compile() ?? null;
         if (!$template || !is_string($template)) {
             throw new TemplateException('Failed to read cached or compile fresh knit template');
         }
+
+        // Metadata
+        $this->metadata("timer", new Metadata\MetaVariable(microtime(true) - $timer));
 
         // Process metadata
         foreach ($this->metadata as $key => $value) {
