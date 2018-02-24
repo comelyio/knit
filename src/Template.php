@@ -42,6 +42,8 @@ class Template
     private $directory;
     /** @var string */
     private $fileName;
+    /** @var string */
+    private $filePath;
 
     /**
      * Template constructor.
@@ -60,6 +62,7 @@ class Template
         $this->metadata = new Metadata();
         $this->directory = $directory;
         $this->fileName = $fileName;
+        $this->filePath = $directory->suffixed($fileName);
     }
 
     /**
@@ -68,6 +71,14 @@ class Template
     public function name(): string
     {
         return $this->fileName;
+    }
+
+    /**
+     * @return string
+     */
+    public function path(): string
+    {
+        return $this->filePath;
     }
 
     /**
@@ -123,7 +134,7 @@ class Template
         }
 
         // Get cached file ID and directory
-        $cacheFileId = md5($this->fileName);
+        $cacheFileId = md5($this->filePath);
         $cachedFileName = null;
         $cachingType = null;
         $cachingDirectory = $this->knit->directories()->_caching;
@@ -229,7 +240,7 @@ class Template
 
         // Caching
         if ($this->caching) {
-            $cacheFileId = md5($this->fileName);
+            $cacheFileId = md5($this->filePath);
             $sessionId = $this->caching->_sessionId;
             if ($this->caching->_type === Caching::AGGRESSIVE && $sessionId) {
                 $cacheFileName = sprintf('knit_%s-%s.knit', $cacheFileId, $sessionId);
