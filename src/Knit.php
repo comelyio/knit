@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Comely\Knit;
 
+use Comely\IO\Events\EventsHandler;
 use Comely\Knit\Exception\CachingException;
 use Comely\Knit\Exception\TemplateException;
 
@@ -29,6 +30,8 @@ class Knit implements Constants
     private $directories;
     /** @var Modifiers */
     private $modifiers;
+    /** @var EventsHandler */
+    private $events;
 
     /**
      * Knit constructor.
@@ -38,6 +41,7 @@ class Knit implements Constants
         $this->caching = new Caching();
         $this->directories = new Directories();
         $this->modifiers = new Modifiers();
+        $this->events = new EventsHandler();
     }
 
     /**
@@ -66,6 +70,14 @@ class Knit implements Constants
     public function modifiers(): Modifiers
     {
         return $this->modifiers;
+    }
+
+    /**
+     * @return EventsHandler
+     */
+    public function events(): EventsHandler
+    {
+        return $this->events;
     }
 
     /**

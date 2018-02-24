@@ -63,6 +63,14 @@ class Template
     }
 
     /**
+     * @return string
+     */
+    public function name(): string
+    {
+        return $this->fileName;
+    }
+
+    /**
      * @return Caching
      * @throws CachingException
      */
@@ -278,6 +286,10 @@ class Template
         if (!is_string($template)) {
             throw new TemplateException('Failed to read cached or compile fresh knit template');
         }
+
+        $this->knit->events()->trigger("template.prepared")
+            ->params($template)
+            ->fire();
 
         // Process metadata
         foreach ($this->metadata as $key => $value) {
