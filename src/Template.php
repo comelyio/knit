@@ -288,7 +288,7 @@ class Template
         }
 
         $this->knit->events()->trigger("template.prepared")
-            ->params($template)
+            ->params($this)
             ->fire();
 
         // Process metadata
