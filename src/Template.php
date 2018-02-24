@@ -300,7 +300,7 @@ class Template
                 }
             }
 
-            if ($metaValue) {
+            if ($metaValue || is_string($metaValue)) {
                 $template = str_replace('%[%' . $key . '%]%', $metaValue, $template);
             }
         }
