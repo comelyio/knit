@@ -125,7 +125,7 @@ class Compiler implements Constants
 
         // Compile file name
         $compiledTemplate->compiledFile = sprintf(
-            'knit_%s_%s%d.php',
+            'knit_%s_%d.php',
             md5($this->fileName),
             mt_rand(0, 1000)
         );
