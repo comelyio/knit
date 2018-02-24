@@ -51,11 +51,11 @@ class Sandbox
         $output = ob_get_contents();
         ob_end_clean();
 
-        if (!$output) {
+        if (!is_string($output)) {
             throw new SandboxException('Sandbox failed to generate template output');
         }
 
-        if (!defined("COMELY_KNIT")) {
+        if (!isset($comelyKnit)) {
             throw new SandboxException('Bad or incorrectly compiled knit template');
         }
 
