@@ -66,13 +66,13 @@ class Data
                 return;
             case "array":
             case "object":
-                $filtered = json_decode(json_encode($valueType), true);
+                $filtered = json_decode(json_encode($value), true);
                 if (!is_array($filtered)) {
                     throw new TemplateException(
                         sprintf('Failed to assign "%s" value to key "%s"', $valueType, $key)
                     );
                 }
-                $this->data[$key] = $value;
+                $this->data[$key] = $filtered;
                 return;
             default:
                 throw new TemplateException(
