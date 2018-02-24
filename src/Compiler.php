@@ -119,8 +119,8 @@ class Compiler implements Constants
         // Compile parsed template into PHP code
         $compile = '<?php' . $this->eolChar;
         $compile .= sprintf('define("COMELY_KNIT", "%s");%s', self::VERSION, $this->eolChar);
-        $compile .= sprintf('define("COMELY_KNIT_PARSE_TIMER", "%s");%s', $compiledTemplate->timer, $this->eolChar);
-        $compile .= sprintf('define("COMELY_KNIT_TIMESTAMP", "%s");%s', $compiledTemplate->timeStamp, $this->eolChar);
+        $compile .= sprintf('define("COMELY_KNIT_PARSE_TIMER", %s);%s', $compiledTemplate->timer, $this->eolChar);
+        $compile .= sprintf('define("COMELY_KNIT_TIMESTAMP", %s);%s?>', $compiledTemplate->timeStamp, $this->eolChar);
         $compile .= $this->parse(); // Parse
 
         // Compile file name
