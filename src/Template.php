@@ -277,10 +277,7 @@ class Template
         $template = $this->cached() ?? $this->compile() ?? null;
         if (!$template || !is_string($template)) {
             throw new TemplateException('Failed to read cached or compile fresh knit template');
-        }
-
-        // Metadata
-        $this->metadata("timer", new Metadata\MetaVariable(microtime(true) - $timer));
+        };
 
         // Process metadata
         foreach ($this->metadata as $key => $value) {
@@ -307,6 +304,9 @@ class Template
                 $template = str_replace('%[%' . $key . '%]%', $metaValue, $template);
             }
         }
+
+        // Timer
+        $template = str_replace('%[%timer%]%', (microtime(true) - $timer), $template);
 
         // Return processed template
         return $template;
