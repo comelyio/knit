@@ -306,7 +306,7 @@ class Template
         }
 
         // Timer
-        $template = str_replace('%[%timer%]%', (microtime(true) - $timer), $template);
+        $template = str_replace('%[%timer%]%', round((microtime(true) - $timer), 5), $template);
 
         // Return processed template
         return $template;
