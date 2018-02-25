@@ -104,6 +104,7 @@ class Modifiers
         $this->register("strtolower");
         $this->register("strtoupper");
         $this->register("is_array");
+        $this->register("is_string");
         $this->register("is_bool");
         $this->register("is_float");
         $this->register("is_int");
