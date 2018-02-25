@@ -44,6 +44,8 @@ class Template
     private $fileName;
     /** @var string */
     private $filePath;
+    /** @var bool */
+    private $deleteCompiled;
 
     /**
      * Template constructor.
@@ -63,6 +65,7 @@ class Template
         $this->directory = $directory;
         $this->fileName = $fileName;
         $this->filePath = $directory->suffixed($fileName);
+        $this->deleteCompiled = true;
     }
 
     /**
@@ -79,6 +82,16 @@ class Template
     public function path(): string
     {
         return $this->filePath;
+    }
+
+    /**
+     * @param bool $bool
+     * @return Template
+     */
+    public function deleteCompiledTemplate(bool $bool): self
+    {
+        $this->deleteCompiled = $bool;
+        return $this;
     }
 
     /**
@@ -273,10 +286,12 @@ class Template
         $this->metadata("timer.compile", new Metadata\MetaVariable($compiled->timer));
 
         // Delete compiled file
-        try {
-            $compiledFile->delete();
-        } catch (DiskException $e) {
-            trigger_error('Failed to delete compiled knit template PHP file', E_USER_WARNING);
+        if($this->deleteCompiled) {
+            try {
+                $compiledFile->delete();
+            } catch (DiskException $e) {
+                trigger_error('Failed to delete compiled knit template PHP file', E_USER_WARNING);
+            }
         }
 
         // Return output string
