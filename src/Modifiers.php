@@ -116,6 +116,8 @@ class Modifiers
         $this->register("basename");
         $this->register("addslashes");
         $this->register("strlen");
+        $this->register("urlencode");
+        $this->register("urldecode");
 
         // Round
         $this->register("round", function (string $var, array $args) {
