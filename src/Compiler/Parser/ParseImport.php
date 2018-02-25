@@ -33,6 +33,6 @@ trait ParseImport
         $fileName = trim(substr($this->token, 5), ' \'"/-.');
 
         // Import parsed template source, but use same Variables $reserved scope
-        return (new Compiler($this->knit, $this->directory, $fileName))->parse($this->reserved);
+        return (new Compiler($this->knit, $this->directory, $fileName . ".knit"))->parse($this->reserved);
     }
 }
