@@ -51,7 +51,7 @@ class Modifiers
                 throw ModifierException::TypeError($var, "date", 1, "string", gettype($format));
             }
 
-            return sprintf('date(%s, %d)', $format, $var);
+            return sprintf('date(%s, %s)', $format, $var);
         });
     }
 
