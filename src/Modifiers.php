@@ -63,7 +63,7 @@ class Modifiers
         // Translate
         $this->register("translate", function (string $var, array $args) {
             // Translation by $knit var
-            if ($var === '$knit') {
+            if (preg_match('/^\$this\-\>data\[(\"|\')knit(\"|\')\]$/', $var)) {
                 $translatable = $args[0] ?? null;
                 if (!is_string($translatable)) {
                     throw ModifierException::TypeError($var, "translate", 1, "string", gettype($translatable));
