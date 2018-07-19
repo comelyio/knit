@@ -78,7 +78,7 @@ class Modifiers
                     throw ModifierException::TypeError($var, "translate", 2, "string", gettype($dynamicKey));
                 }
 
-                return sprintf("__(sprintf(%s, %s)", $translatable, $dynamicKey);
+                return sprintf("__(sprintf(%s, %s))", $translatable, $dynamicKey);
             }
 
             // Direct variable translation
@@ -91,7 +91,7 @@ class Modifiers
                 throw ModifierException::TypeError($var, "translate", 1, "string", gettype($dynamicKey));
             }
 
-            return sprintf("__(sprintf(%s, %s)", $var, $dynamicKey);
+            return sprintf("__(sprintf(%s, %s))", $var, $dynamicKey);
         });
     }
 
