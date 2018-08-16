@@ -148,7 +148,7 @@ class Modifiers
                 throw ModifierException::TypeError($var, "number_format", 3, "string", gettype($thousandsSep));
             }
 
-            return sprintf('number_format(%s, %d, %s, %s)', $var, $decimals, $decimalPoint, $thousandsSep);
+            return sprintf('number_format(%s, %s, %s, %s)', $var, $decimals, $decimalPoint, $thousandsSep);
         });
 
         // Substr
