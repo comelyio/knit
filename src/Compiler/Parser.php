@@ -303,9 +303,9 @@ class Parser
                             $arguments[] = false;
                         } elseif (preg_match('/^(\'|\")[a-z0-9\s\.\_\-]+(\'|\")$/i', $arg)) {
                             $arguments[] = "'" . substr($arg, 1, -1) . "'";
+                        } else {
+                            $arguments[] = $arg; // append as-is
                         }
-
-                        $arguments[] = $arg; // append as-is
                     }
 
                     unset($args);
