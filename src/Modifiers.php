@@ -129,6 +129,28 @@ class Modifiers
             return sprintf('round(%s, %d)', $var, $precision);
         });
 
+        // Number Format
+        $this->register("number_format", function (string $var, array $args) {
+            $decimals = $args[0] ?? null;
+            if (!is_int($decimals)) {
+                if (!is_string($decimals) || !preg_match('/^\$.*/', $decimals)) {
+                    throw ModifierException::TypeError($var, "number_format", 1, "int", gettype($decimals));
+                }
+            }
+
+            $decimalPoint = $args[1] ?? '.';
+            if (!is_string($decimalPoint)) {
+                throw ModifierException::TypeError($var, "number_format", 2, "string", gettype($decimalPoint));
+            }
+
+            $thousandsSep = $args[2] ?? ',';
+            if (!is_string($thousandsSep)) {
+                throw ModifierException::TypeError($var, "number_format", 3, "string", gettype($thousandsSep));
+            }
+
+            return sprintf('number_format(%s, %d, %s, %s)', $var, $decimals, $decimalPoint, $thousandsSep);
+        });
+
         // Substr
         $this->register("substr", function (string $var, array $args) {
             $start = $args[0] ?? null;
