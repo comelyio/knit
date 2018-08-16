@@ -262,7 +262,7 @@ class Parser
              * $modifier = '[a-z0-9\_]+((' . $var . ')|(' . $num . ')|(' . $str . '))*\|?';
              * $pattern = '/^(' . $modifier . ')*$/';
              */
-            $pattern = '/^([a-z0-9\_]+((\:\[\$.+\])|(\:\-?[0-9]+(\.[0-9]+)?)|(\:(\"|\')[a-z0-9\s\.\_\-]+(\"|\')))*\|?)*$/i';
+            $pattern = '/^([a-z0-9\_]+((\:\[\$.+\])|(\:\-?[0-9]+(\.[0-9]+)?)|(\:(\"|\')[a-z0-9\s\.\_\-]*(\"|\')))*\|?)*$/i';
             if (!preg_match($pattern, $modifiers)) {
                 throw $this->exception(
                     sprintf('Incomplete or bad variable modifiers syntax for "%s"', $varName)
