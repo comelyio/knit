@@ -138,12 +138,12 @@ class Modifiers
                 }
             }
 
-            $decimalPoint = $args[1] ?? '.';
+            $decimalPoint = isset($args[1]) ? $args[1] : '.';
             if (!is_string($decimalPoint)) {
                 throw ModifierException::TypeError($var, "number_format", 2, "string", gettype($decimalPoint));
             }
 
-            $thousandsSep = $args[2] ?? ',';
+            $thousandsSep = isset($args[2]) ? $args[2] : ',';
             if (!is_string($thousandsSep)) {
                 throw ModifierException::TypeError($var, "number_format", 3, "string", gettype($thousandsSep));
             }
