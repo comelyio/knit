@@ -123,7 +123,9 @@ class Modifiers
         $this->register("round", function (string $var, array $args) {
             $precision = $args[0] ?? null;
             if (!is_int($precision)) {
-                throw ModifierException::TypeError($var, "round", 1, "int", gettype($precision));
+                if (!is_string($precision) || !preg_match('/^\$.*/', $precision)) {
+                    throw ModifierException::TypeError($var, "round", 1, "int", gettype($precision));
+                }
             }
 
             return sprintf('round(%s, %d)', $var, $precision);
