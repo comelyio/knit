@@ -31,7 +31,7 @@ class ParseException extends CompilerException
      * @param int $line
      * @param string $token
      */
-    public function __construct(string $message = "", int $line, string $token)
+    public function __construct(string $message = "", int $line = 0, ?string $token = null)
     {
         $this->lineNum = $line;
         if ($token) {
