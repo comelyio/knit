@@ -230,7 +230,20 @@ class Parser
 
         // Check if it is not a reserved variable
         if (!$this->reserved->has($var)) {
+            // Variable has other variables inside?
+            if (preg_match('/\[/', $var)) {
+                // Get first token
+                $varSuffix = explode("[", $var);
+                $var = $varSuffix[0];
+                unset($varSuffix[0]);
+                $varSuffix = implode("[", $varSuffix);
+            }
+
             $var = sprintf("\$this->data['%s']", strtolower(substr($var, 1)));
+            if (isset($varSuffix)) {
+                $var .= "[" . $varSuffix;
+                unset($varSuffix);
+            }
         }
 
         // Assemble properties array style
