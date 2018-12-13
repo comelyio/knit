@@ -22,7 +22,6 @@ trait ParsePrint
 {
     /**
      * @return string
-     * @throws \Comely\Knit\Exception\ParseException
      */
     private function parsePrint(): string
     {
