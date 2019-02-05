@@ -22,7 +22,6 @@ trait ParseForeach
 {
     /**
      * @return string
-     * @throws \Comely\Knit\Exception\ParseException
      */
     private function parseForeach(): string
     {
@@ -45,7 +44,6 @@ trait ParseForeach
 
     /**
      * @return string
-     * @throws \Comely\Knit\Exception\ParseException
      */
     private function parseForeachPaired(): string
     {

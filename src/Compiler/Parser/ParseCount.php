@@ -22,7 +22,6 @@ trait ParseCount
 {
     /**
      * @return string
-     * @throws \Comely\Knit\Exception\ParseException
      */
     private function parseCount(): string
     {

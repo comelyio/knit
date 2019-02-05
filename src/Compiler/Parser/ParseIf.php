@@ -23,7 +23,6 @@ trait ParseIf
     /**
      * @param bool $isElseIf
      * @return string
-     * @throws \Comely\Knit\Exception\ParseException
      */
     private function parseIf(bool $isElseIf = false): string
     {
@@ -67,7 +66,6 @@ trait ParseIf
     /**
      * @param string $token
      * @return string
-     * @throws \Comely\Knit\Exception\ParseException
      */
     private function parseIfStatement(string $token): string
     {
@@ -96,7 +94,6 @@ trait ParseIf
      * @param string $which
      * @param bool $canNegate
      * @return string
-     * @throws \Comely\Knit\Exception\ParseException
      */
     private function resolveOperand(string $operand, string $which, bool $canNegate = false): string
     {
