@@ -135,7 +135,7 @@ class Parser
                     return $this->parseForeachElse();
                 } elseif (strtolower($this->token) === "/foreach") {
                     return $this->parseForeachClose();
-                } elseif (preg_match('/^count\s\$[a-z\_]+[a-z0-9\_]*\s[1-9][0-9]*\sto\s[1-9][0-9]*$/i', $this->token)) {
+                } elseif (preg_match('/^count\s\$[a-z\_]+[a-z0-9\_]*\s[0-9]+\sto\s[1-9][0-9]*$/i', $this->token)) {
                     return $this->parseCount();
                 } elseif (strtolower($this->token) === "/count") {
                     return $this->parseCountClose();

@@ -21,7 +21,7 @@ namespace Comely\Knit;
 interface Constants
 {
     /** string Version (Major.Minor.Release) */
-    const VERSION = "2.1.2";
+    const VERSION = "2.1.3";
     /** int Version (Major * 10000 + Minor * 100 + Release) */
-    const VERSION_ID = 20102;
+    const VERSION_ID = 20103;
 }
